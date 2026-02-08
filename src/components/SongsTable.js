@@ -1,0 +1,125 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { connect } from 'react-redux';
+import _ from 'lodash';
+
+import { selectSongQueue, selectSongsFilter, selectSongsFromCurrentPlaylist } from '../reducers';
+import SongDetails from './SongDetails';
+import { AutoSizer } from 'react-virtualized-auto-sizer';
+import { List } from 'react-window';
+
+const SongsTable = (props) => {
+    let filteredSongs = [];
+
+    const ref = useRef(null);
+
+    const [small, setSmall] = useState(false); // Reformat the layout if window is small
+    const resizeObserver = useRef(null);
+
+    useEffect(() => {
+        resizeObserver.current = new ResizeObserver((songTable) => {
+            if (songTable && songTable.length) {
+                const width = songTable[0].target.offsetWidth;
+                if (width < 560 && !small) {
+                    setSmall(true);
+                } else if (width >= 580 && small) {
+                    setSmall(false);
+                }
+            }
+        });
+        resizeObserver.current.observe(document.getElementById('song-collection-container'));
+        return () => {
+            resizeObserver.current.disconnect();
+        };
+    });
+
+    useEffect(() => {
+        if (ref.current) ref.current.scrollTo(0);
+    }, [/*props.songs,*/ props.songsFilter]);
+
+    const Row = ({ index, style }) => {
+        const song = filteredSongs[index];
+        // const queuePosition = props.songQueue.indexOf(song.song_id) + 1;
+
+        return <SongDetails key={song.song_id} song={song} /*queued={queuePosition}*/ style={style} small={small} />;
+    };
+
+    const filters = props.songsFilter.match(/[^ ]+/g);
+    filteredSongs = [];
+
+    props.songs.forEach((song) => {
+        if (props.songQueue.indexOf(song.song_id) < 0) {
+            if (filters) {
+                let match = true;
+
+                filters.forEach((term) => {
+                    if (term && !song.title.toLowerCase().includes(term) && !song.artist.toLowerCase().includes(term)) {
+                        match = false;
+                        return;
+                    }
+                });
+
+                if (match) {
+                    filteredSongs.push(song);
+                }
+            } else {
+                filteredSongs.push(song);
+            }
+        }
+    });
+
+    // const filters = props.songsFilter.toLowerCase().split(' ');
+    // filteredSongs = [];
+
+    // props.songs.forEach((song, i) => {
+    // 	let match = true;
+
+    // 	console.log(filters);
+    // 	if (!filters.length && props.songQueue.indexOf(song.song_id) >= 0) {
+    // 		match = false;
+    // 	}
+
+    // 	filters.forEach((term) => {
+    // 		if (term && !song.title.toLowerCase().includes(term) && !song.artist.toLowerCase().includes(term)) {
+    // 			match = false;
+    // 			return;
+    // 		}
+    // 	});
+
+    // 	if (match) {
+    // 		filteredSongs.push(song);
+    // 	}
+    // });
+
+    return (
+        <AutoSizer key={props.songs}>
+            {({ width, height }) => {
+                return (
+                    <List
+                        id="song-collection"
+                        className="song-list"
+                        width={width}
+                        height={height}
+                        itemSize={62}
+                        itemCount={filteredSongs.length}
+                        overscanCount={4}
+                        initialScrollOffset={0}
+                        itemData={props.songs}
+                        ref={ref}
+                    >
+                        {Row}
+                    </List>
+                );
+            }}
+        </AutoSizer>
+    );
+};
+
+const mapStateToProps = (state) => {
+    return {
+        songs: selectSongsFromCurrentPlaylist(state),
+        songsFilter: selectSongsFilter(state),
+        songQueue: selectSongQueue(state),
+    };
+};
+
+export default connect(mapStateToProps, {})(SongsTable);
