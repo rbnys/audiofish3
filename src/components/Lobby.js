@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
 import canAutoPlay from 'can-autoplay';
 import { detect as detectBrowser } from 'detect-browser';
-import { Tooltip as ReactToolTip } from 'react-tooltip';
+import { Tooltip as ReactTooltip } from 'react-tooltip';
 
 import withRouter from './withRouter';
 import socket from '../socket';

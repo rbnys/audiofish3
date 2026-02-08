@@ -65,6 +65,11 @@ class LobbySongBox extends React.Component {
         socket.emit('downvote_song');
     };
 
+    renderThumb = (props) => {
+        const { key, ...restProps } = props;
+        return <div key={key} {...restProps} />;
+    };
+
     renderVolumeSlider() {
         if (!this.props.currentSong) {
             return null;
@@ -76,7 +81,7 @@ class LobbySongBox extends React.Component {
                     className="slider"
                     thumbClassName="slider__thumb"
                     trackClassName="slider__track"
-                    renderThumb={(props) => <div {...props} />}
+                    renderThumb={this.renderThumb}
                     orientation="vertical"
                     invert
                     onChange={(v) => this.props.setVolume(v)}
@@ -180,7 +185,7 @@ class LobbySongBox extends React.Component {
             <ReactPlayer
                 id="player"
                 ref={(player) => (this.player = player)}
-                url={`https://www.youtube.com/watch?v=${this.props.currentSong.yt_id}`}
+                src={`https://www.youtube.com/watch?v=${this.props.currentSong.yt_id}`}
                 playing={true}
                 volume={this.props.volume / 100}
                 width="560px"

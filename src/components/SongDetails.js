@@ -10,6 +10,7 @@ import { selectSongQueue } from '../reducers';
 import DeleteSongForm from './forms/DeleteSongForm';
 
 const SongDetails = (props) => {
+    console.log("test");
     const { song, style, small } = props;
 
     const previewSong = () => {

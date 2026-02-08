@@ -65,7 +65,7 @@ exports.signIn = async (req, res) => {
 };
 
 exports.signOut = async (req, res) => {
-    req.logout();
+    req.logout(() => {});
 };
 
 exports.exists = async (req, res, next) => {

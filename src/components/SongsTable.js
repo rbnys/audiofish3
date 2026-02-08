@@ -37,6 +37,7 @@ const SongsTable = (props) => {
     }, [/*props.songs,*/ props.songsFilter]);
 
     const Row = ({ index, style }) => {
+        console.log("test22");
         const song = filteredSongs[index];
         // const queuePosition = props.songQueue.indexOf(song.song_id) + 1;
 
@@ -90,27 +91,47 @@ const SongsTable = (props) => {
     // 	}
     // });
 
+    // console.log("props.songs", props.songs);
+    // function SongListChildComponent({ height = 300, width = 300 }) {
+    //     console.log(props);
+    //     console.log(filteredSongs);
+    //     return (
+    //         <List
+    //             id="song-collection"
+    //             className="song-list"
+    //             width={width}
+    //             height={height}
+    //             itemSize={62}
+    //             itemCount={filteredSongs.length}
+    //             overscanCount={4}
+    //             initialScrollOffset={0}
+    //             itemData={props.songs}
+    //         >
+    //             {Row}
+    //         </List>
+    //     );
+    // }
+
     return (
-        <AutoSizer key={props.songs}>
-            {({ width, height }) => {
-                return (
-                    <List
-                        id="song-collection"
-                        className="song-list"
-                        width={width}
-                        height={height}
-                        itemSize={62}
-                        itemCount={filteredSongs.length}
-                        overscanCount={4}
-                        initialScrollOffset={0}
-                        itemData={props.songs}
-                        ref={ref}
-                    >
-                        {Row}
-                    </List>
-                );
-            }}
-        </AutoSizer>
+        <AutoSizer
+            key={props.songs}
+            renderProp={({ width = 100, height = 100 }) => (
+                <List
+                    id="song-collection"
+                    className="song-list"
+                    width={width}
+                    height={height}
+                    itemSize={62}
+                    itemCount={filteredSongs.length}
+                    overscanCount={4}
+                    initialScrollOffset={0}
+                    itemData={props.songs}
+                    ref={ref}
+                >
+                    {Row}
+                </List>
+            )}
+        />
     );
 };
 

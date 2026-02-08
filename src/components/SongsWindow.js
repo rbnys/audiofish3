@@ -64,7 +64,7 @@ class SongsWindow extends React.Component {
             this.props.initSongQueue(queue);
         });
 
-        ReactTooltip.rebuild();
+        // ReactTooltip.rebuild();
     }
 
     componentDidUpdate(prevProps) {
@@ -213,7 +213,7 @@ class SongsWindow extends React.Component {
 
     toggleFullscreen = () => {
         this.updateDimensions(!this.state.fullscreen);
-        ReactTooltip.rebuild();
+        // ReactTooltip.rebuild();
     };
 
     updateRestoredWindowPercentages() {
@@ -239,7 +239,7 @@ class SongsWindow extends React.Component {
 
         this.updateRestoredWindowPercentages();
 
-        ReactTooltip.rebuild();
+        // ReactTooltip.rebuild();
     };
 
     onDragStop = (_event, data) => {
@@ -250,7 +250,7 @@ class SongsWindow extends React.Component {
 
         this.updateRestoredWindowPercentages();
 
-        ReactTooltip.rebuild();
+        // ReactTooltip.rebuild();
     };
 
     preventWindowDrag(event) {

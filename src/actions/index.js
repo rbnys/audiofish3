@@ -1,6 +1,5 @@
 import axios from 'axios';
 import React from 'react';
-import { Tooltip } from 'react-tooltip';
 import {
     selectAuthHeader,
     selectCurrentPlaylist,
@@ -487,7 +486,7 @@ export const openSongsWindow = () => {
     return (dispatch) => {
         dispatch({ type: 'SET_SONGS_FILTER', payload: '' });
         dispatch({ type: 'OPEN_SONGS_WINDOW' });
-        Tooltip.rebuild();
+        // Tooltip.rebuild();
     };
 };
 export const closeSongsWindow = () => {
