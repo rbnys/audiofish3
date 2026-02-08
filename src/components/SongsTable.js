@@ -36,10 +36,13 @@ const SongsTable = (props) => {
         if (ref.current) ref.current.scrollTo(0);
     }, [/*props.songs,*/ props.songsFilter]);
 
-    const Row = ({ index, style }) => {
-        console.log("test22");
-        const song = filteredSongs[index];
+    const Row = ({ index, style, songs, small }) => {
+        const song = songs[index];
         // const queuePosition = props.songQueue.indexOf(song.song_id) + 1;
+
+        if (!song) {
+            return null;
+        }
 
         return <SongDetails key={song.song_id} song={song} /*queued={queuePosition}*/ style={style} small={small} />;
     };
@@ -112,24 +115,29 @@ const SongsTable = (props) => {
     //     );
     // }
 
+    console.log("props.songs", props.songs);
+    if (props.songs.length === 0 || filteredSongs.length === 0) {
+        return (
+            <div id="song-collection" className="song-list empty">
+                <h2>No songs in this playlist yet!</h2>
+            </div>
+        );
+    }
     return (
         <AutoSizer
             key={props.songs}
-            renderProp={({ width = 100, height = 100 }) => (
+            renderProp={({ width, height = 100 }) => (
                 <List
                     id="song-collection"
                     className="song-list"
-                    width={width}
-                    height={height}
-                    itemSize={62}
-                    itemCount={filteredSongs.length}
+                    style={{ height, width }}
+                    rowComponent={Row}
+                    rowCount={filteredSongs.length}
+                    rowHeight={62}
+                    rowProps={{ songs: filteredSongs, small }}
                     overscanCount={4}
-                    initialScrollOffset={0}
-                    itemData={props.songs}
-                    ref={ref}
-                >
-                    {Row}
-                </List>
+                    listRef={ref}
+                />
             )}
         />
     );
