@@ -1,11 +1,10 @@
 const knex = require('../db');
 const sha1 = require('sha1');
 const jwt = require('jwt-simple');
-const config = require('../config');
 
 function getUserToken(userId) {
     const timestamp = new Date().getTime();
-    return jwt.encode({ sub: userId, iat: timestamp }, config.secret);
+    return jwt.encode({ sub: userId, iat: timestamp }, process.env.JWT_SECRET);
 }
 
 exports.signUp = async (req, res, next) => {

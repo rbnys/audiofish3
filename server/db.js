@@ -1,15 +1,15 @@
 // Import path module
 const path = require('path');
 
-// Create connection to SQLite database
+// Create connection to MySQL database
 const connection = {
-	host: '127.0.0.1',
-	port: 3306,
-	user: 'root',
-	database: 'audiofish2'
+	host: process.env.MYSQL_HOST || '127.0.0.1',
+	port: process.env.MYSQL_PORT || 3306,
+	user: process.env.MYSQL_USER || 'root',
+	database: process.env.MYSQL_DATABASE || 'audiofish',
 }
-if (process.env.DB_PASSWORD) {
-	connection.password = process.env.DB_PASSWORD;
+if (process.env.MYSQL_PASSWORD) {
+	connection.password = process.env.MYSQL_PASSWORD;
 }
 
 const knex = require('knex')({
@@ -17,10 +17,6 @@ const knex = require('knex')({
 	connection,
 	useNullAsDefault: true
 });
-
-// Just for debugging purposes:
-// Log all data in "books" table
-// knex.select('*').from('books').then((data) => console.log('data:', data)).catch((err) => console.log(err));
 
 // Export the database
 module.exports = knex;

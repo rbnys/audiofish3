@@ -1,6 +1,5 @@
 const knex = require('./db');
 const jwt = require('jwt-simple');
-const config = require('./config');
 const _ = require('lodash');
 
 async function initSocket(http) {
@@ -37,7 +36,7 @@ async function initSocket(http) {
 
         // Use JWT to determine user info. If none was provided, consider the user a guest
         if (token) {
-            const userId = jwt.decode(token, config.secret).sub;
+            const userId = jwt.decode(token, process.env.JWT_SECRET).sub;
 
             knex('users')
                 .where('user_id', userId)

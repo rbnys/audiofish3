@@ -1,7 +1,6 @@
 const knex = require('../db');
 const sha1 = require('sha1');
 const passport = require('passport');
-const config = require('../config');
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const LocalStrategy = require('passport-local');
@@ -25,7 +24,7 @@ const localLogin = new LocalStrategy(localOptions, function(username, password, 
 
 const jwtOptions = {
 	jwtFromRequest: ExtractJwt.fromHeader('authorization'),
-	secretOrKey: config.secret
+	secretOrKey: process.env.JWT_SECRET
 };
 const jwtLogin = new JwtStrategy(jwtOptions, function(payload, done) {
 	knex('users')
