@@ -1820,6 +1820,7 @@ input[type=password] {
 .song-list-container {
   transition: flex-basis 0.7s;
   user-select: none;
+  min-width: 0;
 }
 
 #song-queue-container {

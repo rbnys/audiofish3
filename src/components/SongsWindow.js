@@ -28,7 +28,7 @@ import loadingGif from '../img/loading1.gif';
 import PlaylistDropdown from './PlaylistDropdown';
 
 class SongsWindow extends React.Component {
-    state = { fullscreen: false, isSongQueueOpen: false };
+    state = { fullscreen: false, isSongQueueOpen: false, isSongsTableReady: false };
 
     // Keeps track of what the size & position of the window were before it was fullscreened
     restoredWindowSize = {
@@ -66,6 +66,16 @@ class SongsWindow extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
+        if (!prevProps.songsWindowIsOpen && this.props.songsWindowIsOpen) {
+            if (this.songsTableReadyTimeout) clearTimeout(this.songsTableReadyTimeout);
+            this.setState({ isSongsTableReady: false });
+            this.songsTableReadyTimeout = setTimeout(() => {
+                this.setState({ isSongsTableReady: true });
+            }, 250);
+        } else if (prevProps.songsWindowIsOpen && !this.props.songsWindowIsOpen) {
+            if (this.songsTableReadyTimeout) clearTimeout(this.songsTableReadyTimeout);
+            if (this.state.isSongsTableReady) this.setState({ isSongsTableReady: false });
+        }
         if (prevProps.songQueueLength === 0 && this.props.songQueueLength > 0) {
             this.setState({ isSongQueueOpen: true });
         } else if (prevProps.songQueueLength > 0 && this.props.songQueueLength === 0) {
@@ -77,6 +87,7 @@ class SongsWindow extends React.Component {
         window.removeEventListener('resize', this.onResizeBrowserWindow);
         socket.off('load_song_queue');
         if (this.resizeObserver) this.resizeObserver.disconnect();
+        if (this.songsTableReadyTimeout) clearTimeout(this.songsTableReadyTimeout);
     }
 
     onResizeBrowserWindow = () => {
@@ -310,7 +321,7 @@ class SongsWindow extends React.Component {
                             className="song-list-container"
                             style={this.state.isSongQueueOpen ? { flexBasis: '50%' } : { flexBasis: '100%' }}
                         >
-                            <SongsTable />
+                            {this.props.songsWindowIsOpen && this.state.isSongsTableReady ? <SongsTable /> : null}
                         </div>
                         <div
                             id="song-queue-container"

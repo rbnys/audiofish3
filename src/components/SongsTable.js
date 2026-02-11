@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 
-import { selectSongQueue, selectSongsFilter, selectSongsFromCurrentPlaylist } from '../reducers';
+import { selectSongQueue, selectSongsFilter, selectSongsFromCurrentPlaylist, selectSongsWindowIsOpen } from '../reducers';
 import SongDetails from './SongDetails';
 import { AutoSizer } from 'react-virtualized-auto-sizer';
 import { List } from 'react-window';
@@ -33,7 +33,7 @@ const SongsTable = (props) => {
     });
 
     useEffect(() => {
-        if (ref.current) ref.current.scrollTo(0);
+        // if (ref.current) ref.current.scrollTo(0);
     }, [/*props.songs,*/ props.songsFilter]);
 
     const Row = ({ index, style, songs, small }) => {
@@ -95,27 +95,6 @@ const SongsTable = (props) => {
     // });
 
     // console.log("props.songs", props.songs);
-    // function SongListChildComponent({ height = 300, width = 300 }) {
-    //     console.log(props);
-    //     console.log(filteredSongs);
-    //     return (
-    //         <List
-    //             id="song-collection"
-    //             className="song-list"
-    //             width={width}
-    //             height={height}
-    //             itemSize={62}
-    //             itemCount={filteredSongs.length}
-    //             overscanCount={4}
-    //             initialScrollOffset={0}
-    //             itemData={props.songs}
-    //         >
-    //             {Row}
-    //         </List>
-    //     );
-    // }
-
-    // console.log("props.songs", props.songs);
     if (props.songs.length === 0 || filteredSongs.length === 0) {
         return (
             <div id="song-collection" className="song-list empty">
@@ -124,7 +103,7 @@ const SongsTable = (props) => {
     }
     return (
         <AutoSizer
-            key={props.songs}
+            key={props.songsWindowIsOpen ? 'open' : 'closed'}
             renderProp={({ width, height = 100 }) => (
                 <List
                     id="song-collection"
@@ -147,6 +126,7 @@ const mapStateToProps = (state) => {
         songs: selectSongsFromCurrentPlaylist(state),
         songsFilter: selectSongsFilter(state),
         songQueue: selectSongQueue(state),
+        songsWindowIsOpen: selectSongsWindowIsOpen(state),
     };
 };
 

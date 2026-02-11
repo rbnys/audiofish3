@@ -2057,6 +2057,7 @@ $pl_controls_padding: 1.2rem;
 .song-list-container {
     transition: flex-basis 0.7s;
     user-select: none;
+    min-width: 0;
 }
 #song-queue-container {
     height: 100%;
