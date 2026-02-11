@@ -27,6 +27,7 @@ import SongForm from './forms/SongForm';
 import GrabSong from './GrabSong';
 
 class LobbySongBox extends React.Component {
+    playerRef = React.createRef();
     state = { songEnded: false, marqueeSongTitle: null, progress: 0, progressSecs: 0 };
 
     componentDidUpdate(prevProps) {
@@ -184,7 +185,7 @@ class LobbySongBox extends React.Component {
         return (
             <ReactPlayer
                 id="player"
-                ref={(player) => (this.player = player)}
+                ref={this.playerRef}
                 src={`https://www.youtube.com/watch?v=${this.props.currentSong.yt_id}`}
                 playing={true}
                 volume={this.props.volume / 100}
@@ -194,18 +195,13 @@ class LobbySongBox extends React.Component {
                     youtube: {
                         playerVars: {
                             modestBranding: 1,
-                            start: 0,
                         },
+                        start: this.props.currentSong.startSecs ?? 0,
                     },
                 }}
-                onReady={(player) => {
-                    if (this.props.currentSong.startSecs) {
-                        player.seekTo(this.props.currentSong.startSecs + 1, 'seconds');
-                    } else {
-                        player.seekTo(0, 'seconds');
-                    }
+                onStart={() => {
+                    this.setState({ songEnded: false })
                 }}
-                onStart={() => this.setState({ songEnded: false })}
                 onEnded={() => this.setState({ songEnded: true })}
                 progressInterval={33}
                 onProgress={(progress) => this.setState({ progress: progress.played, progressSecs: progress.playedSeconds })}
