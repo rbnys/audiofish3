@@ -2,7 +2,6 @@ import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
 import canAutoPlay from 'can-autoplay';
 import { detect as detectBrowser } from 'detect-browser';
-import { Tooltip as ReactTooltip } from 'react-tooltip';
 
 import withRouter from './withRouter';
 import socket from '../socket';
@@ -25,7 +24,6 @@ import {
 import LobbySongBox from './LobbySongBox';
 import LobbySidebar from './LobbySidebar';
 import Icon from './Icon';
-import Tooltip from './Tooltip';
 
 import ffAutoplayTutorial1 from '../img/firefox_autoplay_tutorial_1.png';
 import ffAutoplayTutorial2 from '../img/firefox_autoplay_tutorial_2.png';
@@ -216,41 +214,6 @@ class Lobby extends React.Component {
 						</Fragment>
 					) : null} */}
                 </div>
-                <Tooltip
-                    id="tt-btn-view-song-queue"
-                    place="left"
-                    overridePosition={({ left, top }) => {
-                        return { left: left + 8, top };
-                    }}
-                >
-                    You have no songs in your queue.
-                    <br />
-                    Click the{' '}
-                    <div className="example-button">
-                        <Icon name="plus-circle" />
-                    </div>{' '}
-                    button next to your songs to queue them.
-                </Tooltip>
-                <ReactTooltip
-                    id="tt-pl-dropdown"
-                    place="top"
-                    effect="solid"
-                    className="tool tip"
-                    backgroundColor="var(--color-bg-5)"
-                    overridePosition={({ left, top }) => {
-                        return { left, top: top + 8 };
-                    }}
-                    getContent={(data) => {
-                        return `Hello there, ${data}!`;
-                    }}
-                />
-                {/* <a data-for="enrich" data-tip="sooooo cute">
-                    (❂‿❂)
-                </a>
-                <a data-for="enrich" data-tip="really high">
-                    (❂‿❂)
-                </a>
-                <ReactTooltip id="enrich" getContent={(dataTip) => `This little buddy is ${dataTip}`} /> */}
             </div>
         );
     }

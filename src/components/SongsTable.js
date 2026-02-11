@@ -115,11 +115,10 @@ const SongsTable = (props) => {
     //     );
     // }
 
-    console.log("props.songs", props.songs);
+    // console.log("props.songs", props.songs);
     if (props.songs.length === 0 || filteredSongs.length === 0) {
         return (
             <div id="song-collection" className="song-list empty">
-                <h2>No songs in this playlist yet!</h2>
             </div>
         );
     }

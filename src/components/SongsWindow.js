@@ -17,6 +17,7 @@ import {
     selectSpecificPlaylistIsBeingViewed,
 } from '../reducers';
 import Icon from './Icon';
+import Tooltip from './Tooltip';
 import AddSong from './AddSong';
 import SongsTable from './SongsTable';
 import SongQueue from './SongQueue';
@@ -24,7 +25,6 @@ import PlaylistForm from './forms/PlaylistForm';
 import DeletePlaylistForm from './forms/DeletePlaylistForm';
 
 import loadingGif from '../img/loading1.gif';
-import { Tooltip as ReactTooltip } from 'react-tooltip';
 import PlaylistDropdown from './PlaylistDropdown';
 
 class SongsWindow extends React.Component {
@@ -63,8 +63,6 @@ class SongsWindow extends React.Component {
 
             this.props.initSongQueue(queue);
         });
-
-        // ReactTooltip.rebuild();
     }
 
     componentDidUpdate(prevProps) {
@@ -213,7 +211,6 @@ class SongsWindow extends React.Component {
 
     toggleFullscreen = () => {
         this.updateDimensions(!this.state.fullscreen);
-        // ReactTooltip.rebuild();
     };
 
     updateRestoredWindowPercentages() {
@@ -238,8 +235,6 @@ class SongsWindow extends React.Component {
         this.restoredWindowPosition.y = Math.max(position.y, 0);
 
         this.updateRestoredWindowPercentages();
-
-        // ReactTooltip.rebuild();
     };
 
     onDragStop = (_event, data) => {
@@ -249,8 +244,6 @@ class SongsWindow extends React.Component {
         this.restoredWindowPosition.y = Math.max(data.y, 0);
 
         this.updateRestoredWindowPercentages();
-
-        // ReactTooltip.rebuild();
     };
 
     preventWindowDrag(event) {
@@ -286,9 +279,7 @@ class SongsWindow extends React.Component {
                         />
                         <div
                             id="btn-view-song-queue-wrapper"
-                            data-tip
-                            data-tip-disable={!!this.props.songQueueLength}
-                            data-for="tt-btn-view-song-queue"
+                            data-tooltip-id={!this.props.songQueueLength ? 'tt-btn-view-song-queue' : undefined}
                         >
                             <button
                                 id="btn-view-song-queue"
@@ -302,6 +293,15 @@ class SongsWindow extends React.Component {
                                 </div>
                             </button>
                         </div>
+                        <Tooltip id="tt-btn-view-song-queue" place="left" offset={8}>
+                            You have no songs in your queue.
+                            <br />
+                            Click the{' '}
+                            <div className="example-button">
+                                <Icon name="plus-circle" />
+                            </div>{' '}
+                            button next to your songs to queue them.
+                        </Tooltip>
                     </div>
 
                     <div className="content" onMouseDown={this.preventWindowDrag}>
