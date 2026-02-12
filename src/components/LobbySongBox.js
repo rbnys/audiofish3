@@ -186,7 +186,7 @@ class LobbySongBox extends React.Component {
             <ReactPlayer
                 id="player"
                 ref={this.playerRef}
-                src={`https://www.youtube.com/watch?v=${this.props.currentSong.yt_id}`}
+                url={`https://www.youtube.com/watch?v=${this.props.currentSong.yt_id}`}
                 playing={true}
                 volume={this.props.volume / 100}
                 width="560px"

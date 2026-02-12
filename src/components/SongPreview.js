@@ -21,11 +21,11 @@ class SongPreview extends React.Component {
         switch (type) {
             case 'yt':
                 content = (
-                    <ReactPlayer src={`https://www.youtube.com/watch?v=${song.id.videoId || song.id}`} playing={true} controls={true} width="560px" height="315px" />
+                    <ReactPlayer url={`https://www.youtube.com/watch?v=${song.id.videoId || song.id}`} playing={true} controls={true} width="560px" height="315px" />
                 );
                 break;
             default:
-                content = <ReactPlayer src={`https://www.youtube.com/watch?v=${song.yt_id}`} playing={true} controls={true} width="560px" height="315px" />;
+                content = <ReactPlayer url={`https://www.youtube.com/watch?v=${song.yt_id}`} playing={true} controls={true} width="560px" height="315px" />;
         }
 
         return (
