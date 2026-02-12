@@ -3,11 +3,11 @@ import { connect } from 'react-redux';
 import { reduxForm, Field } from 'redux-form';
 import axios from 'axios';
 
+import Loading from '../Loading';
 import serverIP from '../../server';
 import { signUp, clearLogInError } from '../../actions';
 
 import errorIcon from '../../img/error.png';
-import loadingGif from '../../img/loading1.gif';
 import { selectAuthErrorMessage } from '../../reducers';
 
 class SignUpForm extends React.Component {
@@ -89,11 +89,7 @@ class SignUpForm extends React.Component {
 					</button>
 				</div>
 
-				{this.state.loading && !serverError ? (
-					<div className="loading">
-						<img src={loadingGif} alt="Loading..." />
-					</div>
-				) : null}
+				{this.state.loading && !serverError ? <Loading /> : null}
 			</form>
 		);
 	}

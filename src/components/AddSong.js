@@ -36,7 +36,7 @@ class AddSong extends React.Component {
             axios
                 .post(`${serverIP}/youtube/search-videos`, { query: this.state.searchTerm }, this.props.authHeader)
                 .then((res) => {
-                    console.log(res.data.videos);
+                    // console.log(res.data.videos);
                     if (res.data.videos) {
                         this.setState({ videos: res.data.videos });
                     }
