@@ -42,9 +42,9 @@ class Home extends React.Component {
         for (let i = 0; i < 10; i++) {
             lobbyComponents.push(
                 <div className="item" key={i}>
+                    <img className="lobby-icon" src={faker.image.avatar()} width="256" height="256" alt="" />
                     <div className="content">
                         <div className="header">
-                            <img className="lobby-icon" src={faker.image.avatar()} alt="" />
                             <div className="title-and-song">
                                 <div className="title">The Big Pig's Lobby {i}</div>
                                 <div className="song">
@@ -62,6 +62,11 @@ class Home extends React.Component {
                             </div>
                         </div>
                         <div className="body">
+                            <div className="tags">
+                                <span className="tag">Rock</span>
+                                <span className="tag">Pop</span>
+                                <span className="tag">Rap/Hip Hop</span>
+                            </div>
                             <div className="description">{faker.lorem.paragraphs(Math.floor(Math.random() * 5) + 1, '\r\n\r\n')}</div>
                         </div>
                     </div>

@@ -591,8 +591,10 @@ $pl_controls_padding: 1.2rem;
                 // margin: 0 auto;
 
                 .item {
+                    display: flex;
+                    max-height: 256px;
                     // flex: 0 0 70rem;
-                    width: 80rem;
+                    width: 82rem;
                     // height: 20rem;
                     margin: 1.4rem;
                     text-align: left;
@@ -601,101 +603,137 @@ $pl_controls_padding: 1.2rem;
                     border-radius: var(--round-edge);
                     box-shadow: 4px 4px 10px 2px rgba(0, 0, 0, 0.4), inset 0 0 6px 1px rgba(0, 0, 0, 0.6);
 
-                    .header {
-                        display: flex;
-                        height: 64px;
-                        background: var(--color-primary-darkest);
-                        // box-shadow: 0 4px 8px 1px rgba(0, 0, 0, 0.4);
-                        // border-bottom: 1px solid var(--color-primary-light);
-
-                        .lobby-icon {
-                            margin-right: 1.4rem;
-                        }
-
-                        .title-and-song {
-                            flex: 1 1 100%;
-                            display: flex;
-                            flex-direction: column;
-                            justify-content: space-around;
-                            align-items: flex-start;
-                            margin-top: 0.2rem;
-                            margin-bottom: 0.3rem;
-
-                            .title {
-                                font-size: 1.8rem;
-                                line-height: 2.6rem;
-                                font-weight: bold;
-                            }
-
-                            .song {
-                                display: flex;
-                                align-items: center;
-                                font-size: 1.6rem;
-                                line-height: 2rem;
-                                font-weight: 100;
-
-                                img {
-                                    width: 2.6rem;
-                                    height: 2.6rem;
-                                    margin-right: 0.5rem;
-                                    margin-left: -0.5rem;
-                                }
-                            }
-                        }
-
-                        .user-stats {
-                            display: flex;
-                            flex-direction: column;
-                            justify-content: flex-start;
-                            align-items: flex-start;
-                            margin-right: 1rem;
-                            font-size: 1.3rem;
-
-                            .online-count,
-                            .dj-count {
-                                display: flex;
-                                align-items: center;
-                                white-space: nowrap;
-                            }
-
-                            .online-count {
-                                margin-top: 0.6rem;
-
-                                .icon-online {
-                                    margin-right: 0.6rem;
-                                }
-                            }
-
-                            .dj-count {
-                                margin-top: 1rem;
-
-                                .icon {
-                                    width: 1.2rem;
-                                    height: 1.2rem;
-                                    margin-right: 0.6rem;
-                                    fill: var(--color-primary-lighter);
-                                }
-                            }
-
-                            .owner {
-                                white-space: nowrap;
-                            }
-                        }
+                    .lobby-icon {
+                        width: 256px;
+                        height: 256px;
                     }
 
-                    .body {
-                        // max-height: 0;
-                        overflow: hidden;
-                        transition: max-height 0.5s;
-                        box-shadow: inset 0 6px 6px -4px rgba(0, 0, 0, 0.6);
+                    .content {
+                        .header {
+                            display: flex;
+                            height: 64px;
+                            background: var(--color-primary-darker);
+                            padding-left: 1.4rem;
+                            // box-shadow: 0 4px 8px 1px rgba(0, 0, 0, 0.4);
+                            // border-bottom: 1px solid var(--color-primary-light);
 
-                        .description {
-                            font-size: 1.5rem;
-                            line-height: 2rem;
-                            margin: 1.6rem;
-                            white-space: pre-line;
+                            .lobby-icon {
+                                margin-right: 1.4rem;
+                            }
 
-                            max-height: 150px;
+                            .title-and-song {
+                                flex: 1 1 100%;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: space-around;
+                                align-items: flex-start;
+                                margin-top: 0.2rem;
+                                margin-bottom: 0.3rem;
+
+                                .title {
+                                    font-size: 1.8rem;
+                                    line-height: 2.6rem;
+                                    font-weight: bold;
+                                }
+
+                                .song {
+                                    display: flex;
+                                    align-items: center;
+                                    font-size: 1.6rem;
+                                    line-height: 2rem;
+                                    font-weight: 100;
+
+                                    img {
+                                        width: 2.6rem;
+                                        height: 2.6rem;
+                                        margin-right: 0.5rem;
+                                        margin-left: -0.5rem;
+                                    }
+                                }
+                            }
+
+                            .user-stats {
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: flex-start;
+                                align-items: flex-start;
+                                margin-right: 1rem;
+                                font-size: 1.3rem;
+
+                                .online-count,
+                                .dj-count {
+                                    display: flex;
+                                    align-items: center;
+                                    white-space: nowrap;
+                                }
+
+                                .online-count {
+                                    margin-top: 0.6rem;
+
+                                    .icon-online {
+                                        margin-right: 0.6rem;
+                                    }
+                                }
+
+                                .dj-count {
+                                    margin-top: 1rem;
+
+                                    .icon {
+                                        width: 1.2rem;
+                                        height: 1.2rem;
+                                        margin-right: 0.6rem;
+                                        fill: var(--color-primary-lighter);
+                                    }
+                                }
+
+                                .owner {
+                                    white-space: nowrap;
+                                }
+                            }
+                        }
+
+                        .body {
+                            // max-height: 0;
+                            display: flex;
+                            flex-direction: column;
+                            overflow: hidden;
+                            transition: max-height 0.5s;
+                            box-shadow: inset 0 6px 6px -4px rgba(0, 0, 0, 0.6);
+                            // padding-bottom: 1.6rem;
+                            height: 192px;
+
+                            .tags {
+                                margin: 1.6rem 1.6rem 0 1.6rem;
+
+                                .tag {
+                                    display: inline-block;
+                                    font-size: 1.5rem;
+                                    line-height: 1.6rem;
+                                    padding: 0.2rem 0.6rem 0.4rem 0.6rem;
+                                    margin-right: 1.0rem;
+                                    background: var(--color-bg-3);
+                                    border-radius: var(--round-edge);
+                                    background-color: var(--color-primary);
+                                    opacity: 0.8;
+
+                                    &:hover {
+                                        opacity: 1;
+                                        cursor: pointer;
+                                    }
+                                }
+                            }
+
+                            .description {
+                                font-size: 1.5rem;
+                                line-height: 2rem;
+                                margin: 1.6rem 1.6rem 1.6rem 1.6rem;
+                                white-space: pre-line;
+                                flex: 1 1 auto;
+                                min-height: 0;
+                                overflow: hidden;
+                                mask-image: linear-gradient(to bottom, #000 75%, transparent 100%);
+                                -webkit-mask-image: linear-gradient(to bottom, #000 75%, transparent 100%);
+                            }
                         }
                     }
                 }
