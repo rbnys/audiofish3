@@ -1,3 +1,5 @@
+![Screenshot of AudioFish](https://iili.io/3dvgaXR.jpg)
+
 # AudioFish
 
 AudioFish is a social music-playing web app for desktop browsers that allows users to take turns DJ'ing their favorite songs with friends.
