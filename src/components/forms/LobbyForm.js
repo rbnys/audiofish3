@@ -59,41 +59,73 @@ class LobbyForm extends React.Component {
 
     renderInput = ({ input, label, type, meta, maxLength }) => {
         const syncError = this.state.stepOneSyncErrors[input.name];
+        const isUrlField = input.name === 'url';
         const hasUrlAsyncError = input.name === 'url' && !!this.state.stepOneUrlAsyncError;
         const hasShowableError = (meta.touched || this.state.didAttemptStepOneNext) && (meta.error || syncError || hasUrlAsyncError);
-        console.log('rendering input', { name: input.name, touched: meta.touched, error: meta.error, syncError, hasUrlAsyncError, hasShowableError });
         const inputClassName = `input ${hasShowableError ? 'error' : ''}`;
+        const urlInputClassName = `url-input ${hasShowableError ? 'error' : ''}`;
+        const fieldClassName = `field ${isUrlField ? 'url' : ''}`;
         const errorText = hasUrlAsyncError ? this.state.stepOneUrlAsyncError : meta.error || syncError;
         const errorMessage = hasShowableError ? <div className="error-msg">{errorText}</div> : null;
         const autoFocus = input.name === 'name';
 
         return (
-            <div className="field">
+            <div className={fieldClassName}>
                 <label className="label">{label}</label>
-                <input
-                    className={inputClassName}
-                    {...input}
-                    onChange={(event) => {
-                        input.onChange(event);
+                {isUrlField ? (
+                    <div className="input url-input-group">
+                        <span className="url-prefix">http://audio.fish/</span>
+                        <input
+                            className={urlInputClassName}
+                            {...input}
+                            onChange={(event) => {
+                                input.onChange(event);
 
-                        if (input.name === 'url' && this.state.stepOneUrlAsyncError) {
-                            this.setState({ stepOneUrlAsyncError: null });
-                        }
+                                if (input.name === 'url' && this.state.stepOneUrlAsyncError) {
+                                    this.setState({ stepOneUrlAsyncError: null });
+                                }
 
-                        if (this.state.stepOneSyncErrors[input.name]) {
-                            this.setState((prevState) => ({
-                                stepOneSyncErrors: {
-                                    ...prevState.stepOneSyncErrors,
-                                    [input.name]: null,
-                                },
-                            }));
-                        }
-                    }}
-                    type={type}
-                    autoComplete="off"
-                    autoFocus={autoFocus}
-                    maxLength={maxLength}
-                />
+                                if (this.state.stepOneSyncErrors[input.name]) {
+                                    this.setState((prevState) => ({
+                                        stepOneSyncErrors: {
+                                            ...prevState.stepOneSyncErrors,
+                                            [input.name]: null,
+                                        },
+                                    }));
+                                }
+                            }}
+                            type={type}
+                            autoComplete="off"
+                            autoFocus={autoFocus}
+                            maxLength={maxLength}
+                        />
+                    </div>
+                ) : (
+                    <input
+                        className={inputClassName}
+                        {...input}
+                        onChange={(event) => {
+                            input.onChange(event);
+
+                            if (input.name === 'url' && this.state.stepOneUrlAsyncError) {
+                                this.setState({ stepOneUrlAsyncError: null });
+                            }
+
+                            if (this.state.stepOneSyncErrors[input.name]) {
+                                this.setState((prevState) => ({
+                                    stepOneSyncErrors: {
+                                        ...prevState.stepOneSyncErrors,
+                                        [input.name]: null,
+                                    },
+                                }));
+                            }
+                        }}
+                        type={type}
+                        autoComplete="off"
+                        autoFocus={autoFocus}
+                        maxLength={maxLength}
+                    />
+                )}
                 {errorMessage}
             </div>
         );
@@ -181,6 +213,10 @@ class LobbyForm extends React.Component {
 
         if (Object.keys(syncErrors).length > 0) {
             this.setState({ stepOneUrlAsyncError: null, stepOneSyncErrors: syncErrors });
+            return;
+        }
+
+        if (this.state.stepOneUrlAsyncError) {
             return;
         }
 
