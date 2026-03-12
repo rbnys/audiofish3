@@ -61,6 +61,7 @@ class LobbyForm extends React.Component {
         const syncError = this.state.stepOneSyncErrors[input.name];
         const hasUrlAsyncError = input.name === 'url' && !!this.state.stepOneUrlAsyncError;
         const hasShowableError = (meta.touched || this.state.didAttemptStepOneNext) && (meta.error || syncError || hasUrlAsyncError);
+        console.log('rendering input', { name: input.name, touched: meta.touched, error: meta.error, syncError, hasUrlAsyncError, hasShowableError });
         const inputClassName = `input ${hasShowableError ? 'error' : ''}`;
         const errorText = hasUrlAsyncError ? this.state.stepOneUrlAsyncError : meta.error || syncError;
         const errorMessage = hasShowableError ? <div className="error-msg">{errorText}</div> : null;
@@ -282,6 +283,7 @@ class LobbyForm extends React.Component {
                         name="name"
                         type="text"
                         label="Lobby Name:"
+                        key={this.state.stepOneSyncErrors.name ? `name-${this.state.stepOneSyncErrors.name}` : 'name'}
                         maxLength={MAX_LOBBY_NAME_LENGTH}
                         component={this.renderInput}
                     />
@@ -289,6 +291,7 @@ class LobbyForm extends React.Component {
                         name="url"
                         type="text"
                         label="URL:"
+                        key={this.state.stepOneSyncErrors.url || this.state.stepOneUrlAsyncError ? `url-${this.state.stepOneSyncErrors.url || this.state.stepOneUrlAsyncError}` : 'url'}
                         maxLength={MAX_URL_LENGTH}
                         component={this.renderInput}
                     />
@@ -322,7 +325,7 @@ class LobbyForm extends React.Component {
         return (
             <Fragment>
                 <div className="genre-step">
-                    <div className="genre-step__heading">Choose 1 to 5 genre tags</div>
+                    <div className="genre-step__heading">Choose 1-5 genre tags</div>
 
                     <div className="genre-step__tags">
                         {this.state.genres.map((genre) => {
@@ -371,7 +374,8 @@ class LobbyForm extends React.Component {
                     <span className="title">Create Your Lobby</span>
                 </div>
 
-                {this.state.isLoadingGenres || this.state.isSubmittingLobby || this.state.isValidatingStepOne ? <Loading /> : currentStep}
+                {(this.state.step === 2 && this.state.isLoadingGenres) || this.state.isSubmittingLobby || this.state.isValidatingStepOne ? <Loading /> : null}
+                {currentStep}
             </form>
         );
     }
@@ -446,6 +450,12 @@ export default connect(mapStateToProps, { fetchLobbyGenres, checkLobbyPathnameEx
         },
         validate,
         asyncValidate,
+        shouldAsyncValidate: (params) => {
+            if (!params.syncValidationPasses) {
+                return false;
+            }
+            return (params.trigger === 'blur');
+        },
         asyncBlurFields: [ 'url' ],
     })(LobbyForm)
 );
