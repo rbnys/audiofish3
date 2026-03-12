@@ -6,6 +6,7 @@ import Icon from './Icon';
 import LobbyHeader from './LobbyHeader';
 import SongsWindow from './SongsWindow';
 import LobbyForm from './forms/LobbyForm';
+import LogInOrSignUp from './LogInOrSignUp';
 import { setLoading, setModalComponent } from '../actions';
 import { selectIsLoggedIn, selectUserId } from '../reducers';
 

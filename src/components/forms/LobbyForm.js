@@ -1,15 +1,16 @@
 import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
-import { reduxForm, Field } from 'redux-form';
+import { reduxForm, Field, formValueSelector } from 'redux-form';
 import Dropdown from 'react-dropdown';
 
 import Icon from '../Icon';
 import Loading from '../Loading';
-import { fetchLobbyGenres } from '../../actions';
+import { checkLobbyPathnameExists, createLobby, fetchLobbyGenres } from '../../actions';
 
 const MAX_LOBBY_NAME_LENGTH = 50;
 const MAX_URL_LENGTH = 32;
 const MAX_DESCRIPTION_LENGTH = 255;
+const URL_REGEX = /^[a-z0-9_-]+$/i;
 
 const VISIBILITY_OPTIONS = [
     {
@@ -30,7 +31,13 @@ class LobbyForm extends React.Component {
         genres: [],
         selectedGenreIds: [],
         isLoadingGenres: false,
+        isSubmittingLobby: false,
+        isValidatingStepOne: false,
+        didAttemptStepOneNext: false,
         didAttemptGenreSubmit: false,
+        submitError: null,
+        stepOneUrlAsyncError: null,
+        stepOneSyncErrors: {},
     };
 
     componentDidMount() {
@@ -51,9 +58,12 @@ class LobbyForm extends React.Component {
     };
 
     renderInput = ({ input, label, type, meta, maxLength }) => {
-        const hasShowableError = meta.error && meta.touched;
+        const syncError = this.state.stepOneSyncErrors[input.name];
+        const hasUrlAsyncError = input.name === 'url' && !!this.state.stepOneUrlAsyncError;
+        const hasShowableError = (meta.touched || this.state.didAttemptStepOneNext) && (meta.error || syncError || hasUrlAsyncError);
         const inputClassName = `input ${hasShowableError ? 'error' : ''}`;
-        const errorMessage = hasShowableError ? <div className="error-msg">{meta.error}</div> : null;
+        const errorText = hasUrlAsyncError ? this.state.stepOneUrlAsyncError : meta.error || syncError;
+        const errorMessage = hasShowableError ? <div className="error-msg">{errorText}</div> : null;
         const autoFocus = input.name === 'name';
 
         return (
@@ -62,6 +72,22 @@ class LobbyForm extends React.Component {
                 <input
                     className={inputClassName}
                     {...input}
+                    onChange={(event) => {
+                        input.onChange(event);
+
+                        if (input.name === 'url' && this.state.stepOneUrlAsyncError) {
+                            this.setState({ stepOneUrlAsyncError: null });
+                        }
+
+                        if (this.state.stepOneSyncErrors[input.name]) {
+                            this.setState((prevState) => ({
+                                stepOneSyncErrors: {
+                                    ...prevState.stepOneSyncErrors,
+                                    [input.name]: null,
+                                },
+                            }));
+                        }
+                    }}
                     type={type}
                     autoComplete="off"
                     autoFocus={autoFocus}
@@ -73,8 +99,10 @@ class LobbyForm extends React.Component {
     };
 
     renderVisibilityDropdown = ({ input, label, meta }) => {
-        const hasShowableError = meta.error && meta.touched;
-        const errorMessage = hasShowableError ? <div className="error-msg">{meta.error}</div> : null;
+        const syncError = this.state.stepOneSyncErrors.visibility;
+        const errorText = meta.error || syncError;
+        const hasShowableError = !!errorText && (meta.touched || this.state.didAttemptStepOneNext);
+        const errorMessage = hasShowableError ? <div className="error-msg">{errorText}</div> : null;
         const currentSelection = VISIBILITY_OPTIONS.find(({ value }) => value === input.value) || VISIBILITY_OPTIONS[0];
 
         return (
@@ -87,7 +115,18 @@ class LobbyForm extends React.Component {
                         menuClassName="pl-dropdown__menu"
                         options={VISIBILITY_OPTIONS}
                         value={currentSelection}
-                        onChange={(option) => input.onChange(option.value)}
+                        onChange={(option) => {
+                            input.onChange(option.value);
+
+                            if (this.state.stepOneSyncErrors.visibility) {
+                                this.setState((prevState) => ({
+                                    stepOneSyncErrors: {
+                                        ...prevState.stepOneSyncErrors,
+                                        visibility: null,
+                                    },
+                                }));
+                            }
+                        }}
                         onBlur={() => input.onBlur(input.value)}
                     />
                 </div>
@@ -98,27 +137,95 @@ class LobbyForm extends React.Component {
     };
 
     renderTextArea = ({ input, label, meta, maxLength }) => {
-        const hasShowableError = meta.error && meta.touched;
+        const syncError = this.state.stepOneSyncErrors.description;
+        const errorText = meta.error || syncError;
+        const hasShowableError = !!errorText && (meta.touched || this.state.didAttemptStepOneNext);
         const textAreaClassName = `input textarea ${hasShowableError ? 'error' : ''}`;
-        const errorMessage = hasShowableError ? <div className="error-msg">{meta.error}</div> : null;
+        const errorMessage = hasShowableError ? <div className="error-msg">{errorText}</div> : null;
 
         return (
             <div className="field description">
                 <label className="label">{label}</label>
-                <textarea className={textAreaClassName} {...input} maxLength={maxLength} rows="5" />
+                <textarea
+                    className={textAreaClassName}
+                    {...input}
+                    onChange={(event) => {
+                        input.onChange(event);
+
+                        if (this.state.stepOneSyncErrors.description) {
+                            this.setState((prevState) => ({
+                                stepOneSyncErrors: {
+                                    ...prevState.stepOneSyncErrors,
+                                    description: null,
+                                },
+                            }));
+                        }
+                    }}
+                    maxLength={maxLength}
+                    rows="5"
+                />
                 {errorMessage}
             </div>
         );
     };
 
     onClickNext = () => {
-        this.props.handleSubmit(() => {
-            this.setState({ step: 2 });
-        })();
+        const stepOneFieldNames = [ 'name', 'url', 'visibility', 'description' ];
+
+        this.setState({ didAttemptStepOneNext: true });
+        this.props.touch(...stepOneFieldNames);
+
+        const values = this.props.formValues || {};
+        const syncErrors = validate(values);
+
+        if (Object.keys(syncErrors).length > 0) {
+            this.setState({ stepOneUrlAsyncError: null, stepOneSyncErrors: syncErrors });
+            return;
+        }
+
+        this.setState({
+            isValidatingStepOne: true,
+            submitError: null,
+            stepOneUrlAsyncError: null,
+            stepOneSyncErrors: {},
+        });
+
+        this.props
+            .checkLobbyPathnameExists(values.url)
+            .then((exists) => {
+                if (exists) {
+                    this.setState({
+                        isValidatingStepOne: false,
+                        stepOneUrlAsyncError: 'That lobby URL is already taken.',
+                    });
+                    return;
+                }
+
+                this.setState({
+                    isValidatingStepOne: false,
+                    step: 2,
+                    didAttemptStepOneNext: false,
+                    stepOneUrlAsyncError: null,
+                    stepOneSyncErrors: {},
+                });
+            })
+            .catch(() => {
+                this.setState({
+                    isValidatingStepOne: false,
+                    stepOneUrlAsyncError: 'Could not validate this URL right now. Please try again.',
+                });
+            });
     };
 
     onClickBack = () => {
-        this.setState({ step: 1, didAttemptGenreSubmit: false });
+        this.setState({
+            step: 1,
+            didAttemptStepOneNext: false,
+            didAttemptGenreSubmit: false,
+            submitError: null,
+            stepOneUrlAsyncError: null,
+            stepOneSyncErrors: {},
+        });
     };
 
     toggleGenre = (genreId) => {
@@ -145,16 +252,26 @@ class LobbyForm extends React.Component {
             return;
         }
 
-        if (this.props.onSubmit) {
-            this.props.onSubmit({
-                ...values,
-                genres: this.state.selectedGenreIds,
-            });
-        }
+        const payload = {
+            name: values.name,
+            pathname: values.url,
+            visibility: values.visibility,
+            description: values.description || '',
+            genres: this.state.selectedGenreIds,
+        };
 
-        if (this.props.handleClose) {
-            this.props.handleClose();
-        }
+        this.setState({ isSubmittingLobby: true, submitError: null });
+
+        this.props
+            .createLobby(payload)
+            .then((createdLobby) => {
+                const path = (createdLobby && createdLobby.pathname) || payload.pathname;
+                window.location.href = `/${path}`;
+            })
+            .catch((error) => {
+                const message = error?.response?.data || 'Could not create lobby. Please try again.';
+                this.setState({ isSubmittingLobby: false, submitError: message });
+            });
     };
 
     renderStepOne() {
@@ -192,6 +309,8 @@ class LobbyForm extends React.Component {
                         Next
                     </button>
                 </div>
+
+                {this.state.submitError ? <div className="server-error"><span>{this.state.submitError}</span></div> : null}
             </Fragment>
         );
     }
@@ -237,6 +356,8 @@ class LobbyForm extends React.Component {
                         </Fragment>
                     </button>
                 </div>
+
+                {this.state.submitError ? <div className="server-error"><span>{this.state.submitError}</span></div> : null}
             </Fragment>
         );
     }
@@ -250,7 +371,7 @@ class LobbyForm extends React.Component {
                     <span className="title">Create Your Lobby</span>
                 </div>
 
-                {this.state.isLoadingGenres ? <Loading /> : currentStep}
+                {this.state.isLoadingGenres || this.state.isSubmittingLobby || this.state.isValidatingStepOne ? <Loading /> : currentStep}
             </form>
         );
     }
@@ -269,6 +390,8 @@ const validate = (values) => {
         errors.url = 'Please enter a URL.';
     } else if (values.url.length > MAX_URL_LENGTH) {
         errors.url = `URL must not exceed ${MAX_URL_LENGTH} characters.`;
+    } else if (!URL_REGEX.test(values.url)) {
+        errors.url = 'URL can only include letters, numbers, underscores, and hyphens.';
     }
 
     if (!values.visibility || (values.visibility !== 'public' && values.visibility !== 'private')) {
@@ -282,12 +405,47 @@ const validate = (values) => {
     return errors;
 };
 
-export default connect(null, { fetchLobbyGenres })(
+const asyncValidate = (values, dispatch, props, blurredField) => {
+    if (blurredField && blurredField !== 'url') {
+        return Promise.resolve();
+    }
+
+    if (!values.url || values.url.length > MAX_URL_LENGTH || !URL_REGEX.test(values.url)) {
+        return Promise.resolve();
+    }
+
+    return props
+        .checkLobbyPathnameExists(values.url)
+        .then((exists) => {
+            if (exists) {
+                throw { url: 'That lobby URL is already taken.' };
+            }
+        })
+        .catch((error) => {
+            if (error && error.url) {
+                throw error;
+            }
+
+            throw { url: 'Could not validate this URL right now. Please try again.' };
+        });
+};
+
+const selector = formValueSelector('lobbyForm');
+
+const mapStateToProps = (state) => {
+    return {
+        formValues: selector(state, 'name', 'url', 'visibility', 'description'),
+    };
+};
+
+export default connect(mapStateToProps, { fetchLobbyGenres, checkLobbyPathnameExists, createLobby })(
     reduxForm({
         form: 'lobbyForm',
         initialValues: {
             visibility: 'public',
         },
         validate,
+        asyncValidate,
+        asyncBlurFields: [ 'url' ],
     })(LobbyForm)
 );

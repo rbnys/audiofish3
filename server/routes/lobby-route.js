@@ -8,5 +8,7 @@ const requireAuth = passport.authenticate('jwt', { session: false });
 const router = express.Router();
 
 router.post('/genres', requireAuth, lobbyRoutes.getGenres);
+router.post('/pathname-exists', requireAuth, lobbyRoutes.pathnameExists);
+router.post('/create', requireAuth, lobbyRoutes.createLobby);
 
 module.exports = router;

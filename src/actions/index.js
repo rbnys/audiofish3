@@ -115,6 +115,39 @@ export const fetchLobbyGenres = () => {
     };
 };
 
+export const checkLobbyPathnameExists = (pathname) => {
+    return async (dispatch, getState) => {
+        return axios
+            .post(
+                `${serverIP}/lobby/pathname-exists`,
+                {
+                    pathname,
+                },
+                { headers: selectAuthHeader(getState()) }
+            )
+            .then((res) => {
+                return !!(res.data && res.data.exists);
+            })
+            .catch((error) => {
+                console.error(`Error checking lobby URL availability: ${error}`);
+                throw error;
+            });
+    };
+};
+
+export const createLobby = (values) => {
+    return async (dispatch, getState) => {
+        return axios
+            .post(`${serverIP}/lobby/create`, values, { headers: selectAuthHeader(getState()) })
+            .then((res) => {
+                return res.data;
+            })
+            .catch((error) => {
+                throw error;
+            });
+    };
+};
+
 export const setUsersInLobby = (userList) => {
     return {
         type: 'SET_USERS_IN_LOBBY',
