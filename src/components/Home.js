@@ -5,7 +5,8 @@ import socket from '../socket';
 import Icon from './Icon';
 import LobbyHeader from './LobbyHeader';
 import SongsWindow from './SongsWindow';
-import { setLoading } from '../actions';
+import LobbyForm from './forms/LobbyForm';
+import { setLoading, setModalComponent } from '../actions';
 import { selectIsLoggedIn, selectUserId } from '../reducers';
 
 import placeholderImage from '../img/uyuyuy99.png';
@@ -38,6 +39,11 @@ class Home extends React.Component {
     //     const rowSpan = Math.ceil((item.querySelector('.content').getBoundingClientRect().height + rowGap) / (rowHeight + rowGap));
     //     item.style.gridRowEnd = 'span ' + rowSpan;
     // };
+
+    showEditSongModal = () => {
+        const modalContent = this.props.isLoggedIn ? (<LobbyForm />) : (<LogInOrSignUp />);
+        this.props.setModalComponent(0, modalContent);
+    };
 
     renderLobbies() {
         const lobbyComponents = [];
@@ -98,7 +104,7 @@ class Home extends React.Component {
                             </div>
                         </div>
                         <div id="home__body__fish__addlobby">
-                            <button className="btn-add-lobby">
+                            <button className="btn-add-lobby" onClick={this.showEditSongModal}>
                                 <Icon name="plus" />
                                 Create Your Lobby
                             </button>
@@ -130,4 +136,5 @@ const mapStateToProps = (state) => {
 
 export default connect(mapStateToProps, {
     setLoading,
+    setModalComponent,
 })(Home);

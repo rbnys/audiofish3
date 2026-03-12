@@ -2827,6 +2827,48 @@ $pl_controls_padding: 1.2rem;
     }
 }
 
+.lobby-form {
+    @include modal_form(12rem, 40rem);
+
+    .header {
+        padding: 1.6rem 1.2rem 0.4rem;
+
+        .title {
+            @include modal_heading();
+            line-height: 1.3;
+        }
+    }
+
+    .field {
+        &.description {
+            .label {
+                vertical-align: top;
+                padding-top: 0.8rem;
+            }
+        }
+
+        .input.textarea {
+            font-size: 1.8rem;
+            color: var(--color-text-primary);
+            background-color: var(--color-bg-2);
+            border: 1px solid var(--color-bg-3);
+            border-radius: var(--round-edge);
+        }
+
+        .input.textarea {
+            min-height: 10rem;
+            padding: 0.8rem;
+            resize: vertical;
+            outline: none;
+            font-family: var(--font-main);
+
+            &:focus {
+                border-color: var(--color-button-light);
+            }
+        }
+    }
+}
+
 //////////////////////////////////////////////////////////////////////////
 /////////////                                                /////////////
 /////////////                 Misc.                          /////////////
