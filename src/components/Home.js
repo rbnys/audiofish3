@@ -97,6 +97,12 @@ class Home extends React.Component {
                                 Join a lobby below, or create your own!
                             </div>
                         </div>
+                        <div id="home__body__fish__addlobby">
+                            <button className="btn-add-lobby">
+                                <Icon name="plus" />
+                                Create Your Lobby
+                            </button>
+                        </div>
                     </div>
                     <div id="home__body__lobbies">
                         <div id="home__body__lobbies__search">
