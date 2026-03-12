@@ -346,6 +346,7 @@ class LobbyForm extends React.Component {
                     </button>
                     <button className="btn-submit" type="button" onClick={this.onClickNext}>
                         Next
+                        <Icon name="chevron-right" className="chevron-right" />
                     </button>
                 </div>
 
@@ -387,6 +388,7 @@ class LobbyForm extends React.Component {
 
                 <div className="btns">
                     <button className="btn-close" type="button" onClick={this.onClickBack}>
+                        <Icon name="chevron-left" className="chevron-left" />
                         Back
                     </button>
                     <button className="btn-submit" type="submit">
