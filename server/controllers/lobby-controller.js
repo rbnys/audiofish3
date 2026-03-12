@@ -1,4 +1,5 @@
 const knex = require('../db');
+const { upsertLobby } = require('../socket');
 
 const MAX_LOBBY_NAME_LENGTH = 50;
 const MAX_PATHNAME_LENGTH = 32;
@@ -7,6 +8,8 @@ const MAX_DESCRIPTION_LENGTH = 255;
 const PATHNAME_REGEX = /^[a-z0-9_-]+$/i;
 
 exports.getGenres = async (req, res, next) => {
+    // await new Promise((resolve) => setTimeout(resolve, 3000));
+
     knex('genres')
         .select('genre_id', 'tag')
         .orderBy('tag', 'asc')
@@ -19,6 +22,8 @@ exports.getGenres = async (req, res, next) => {
 };
 
 exports.pathnameExists = async (req, res, next) => {
+    // await new Promise((resolve) => setTimeout(resolve, 3000));
+
     const pathname = (req.body.pathname || '').trim();
 
     if (!pathname) {
@@ -37,6 +42,8 @@ exports.pathnameExists = async (req, res, next) => {
 };
 
 exports.createLobby = async (req, res, next) => {
+    // await new Promise((resolve) => setTimeout(resolve, 3000));
+    
     try {
         const name = (req.body.name || '').trim();
         const pathname = (req.body.pathname || req.body.url || '').trim();
@@ -115,6 +122,13 @@ exports.createLobby = async (req, res, next) => {
 
             const lobby = await trx('user_lobbies').where('lobby_id', lobbyId).first();
             return lobby;
+        });
+
+        upsertLobby({
+            ...createdLobby,
+            id: createdLobby.lobby_id,
+            user_id: req.user.user_id,
+            username: req.user.username,
         });
 
         return res.json(createdLobby);

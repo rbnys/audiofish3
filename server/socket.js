@@ -2,27 +2,45 @@ const knex = require('./db');
 const jwt = require('jwt-simple');
 const _ = require('lodash');
 
+const lobbies = new Map();
+
+function upsertLobby(lobby) {
+    if (!lobby || !lobby.pathname) {
+        return;
+    }
+
+    const id = lobby.id || lobby.lobby_id;
+    const ownerId = lobby.user_id || _.get(lobby, 'owner.id');
+    const ownerUsername = lobby.username || _.get(lobby, 'owner.username');
+
+    lobbies.set(lobby.pathname, {
+        id,
+        pathname: lobby.pathname,
+        name: lobby.name,
+        privacy: lobby.privacy,
+        owner: { id: ownerId, username: ownerUsername },
+        guests: 0,
+        djQueue: [],
+        currentSong: null,
+        songStartedAt: 0,
+        songVotes: {
+            ups: [],
+            downs: [],
+            grabs: [],
+        },
+    });
+}
+
 async function initSocket(http) {
-    const lobbies = new Map();
     const songQueues = new Map();
+
+    lobbies.clear();
 
     const lobbyRows = await knex('user_lobbies')
         .select(['lobby_id AS id', 'pathname', 'name', 'privacy', 'users.user_id', 'username'])
         .innerJoin('users', 'users.user_id', 'user_lobbies.user_id');
     lobbyRows.forEach((lobby) => {
-        lobbies.set(lobby.pathname, {
-            ..._.pick(lobby, ['id', 'pathname', 'name', 'privacy']),
-            owner: { id: lobby.user_id, username: lobby.username },
-            guests: 0,
-            djQueue: [],
-            currentSong: null,
-            songStartedAt: 0,
-            songVotes: {
-                ups: [],
-                downs: [],
-                grabs: [],
-            },
-        });
+        upsertLobby(lobby);
     });
 
     const io = require('socket.io')(http, {
@@ -409,3 +427,4 @@ async function initSocket(http) {
 }
 
 module.exports = initSocket;
+module.exports.upsertLobby = upsertLobby;
