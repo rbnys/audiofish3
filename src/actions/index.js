@@ -101,6 +101,20 @@ export const setLobby = (lobby) => {
     };
 };
 
+export const fetchLobbyGenres = () => {
+    return async (dispatch, getState) => {
+        return axios
+            .post(`${serverIP}/lobby/genres`, {}, { headers: selectAuthHeader(getState()) })
+            .then((res) => {
+                return res.data;
+            })
+            .catch((error) => {
+                console.error(`Error fetching lobby genres: ${error}`);
+                return [];
+            });
+    };
+};
+
 export const setUsersInLobby = (userList) => {
     return {
         type: 'SET_USERS_IN_LOBBY',

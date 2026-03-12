@@ -1,8 +1,11 @@
 import React, { Fragment } from 'react';
+import { connect } from 'react-redux';
 import { reduxForm, Field } from 'redux-form';
 import Dropdown from 'react-dropdown';
 
 import Icon from '../Icon';
+import Loading from '../Loading';
+import { fetchLobbyGenres } from '../../actions';
 
 const MAX_LOBBY_NAME_LENGTH = 50;
 const MAX_URL_LENGTH = 32;
@@ -22,6 +25,31 @@ const VISIBILITY_OPTIONS = [
 ];
 
 class LobbyForm extends React.Component {
+    state = {
+        step: 1,
+        genres: [],
+        selectedGenreIds: [],
+        isLoadingGenres: false,
+        didAttemptGenreSubmit: false,
+    };
+
+    componentDidMount() {
+        this.loadGenres();
+    }
+
+    loadGenres = () => {
+        this.setState({ isLoadingGenres: true });
+
+        this.props
+            .fetchLobbyGenres()
+            .then((genres) => {
+                this.setState({ genres, isLoadingGenres: false });
+            })
+            .catch(() => {
+                this.setState({ genres: [], isLoadingGenres: false });
+            });
+    };
+
     renderInput = ({ input, label, type, meta, maxLength }) => {
         const hasShowableError = meta.error && meta.touched;
         const inputClassName = `input ${hasShowableError ? 'error' : ''}`;
@@ -83,18 +111,55 @@ class LobbyForm extends React.Component {
         );
     };
 
-    onSubmit = (values) => {
-        this.props.onSubmit(values);
-        this.props.handleClose();
+    onClickNext = () => {
+        this.props.handleSubmit(() => {
+            this.setState({ step: 2 });
+        })();
     };
 
-    render() {
-        return (
-            <form className="lobby-form" onSubmit={this.props.handleSubmit(this.onSubmit)}>
-                <div className="header">
-                    <span className="title">Create Your Lobby</span>
-                </div>
+    onClickBack = () => {
+        this.setState({ step: 1, didAttemptGenreSubmit: false });
+    };
 
+    toggleGenre = (genreId) => {
+        this.setState((prevState) => {
+            if (prevState.selectedGenreIds.includes(genreId)) {
+                return {
+                    selectedGenreIds: prevState.selectedGenreIds.filter((id) => id !== genreId),
+                };
+            }
+
+            if (prevState.selectedGenreIds.length >= 5) {
+                return null;
+            }
+
+            return {
+                selectedGenreIds: [...prevState.selectedGenreIds, genreId],
+            };
+        });
+    };
+
+    onSubmit = (values) => {
+        if (!this.state.selectedGenreIds.length) {
+            this.setState({ didAttemptGenreSubmit: true });
+            return;
+        }
+
+        if (this.props.onSubmit) {
+            this.props.onSubmit({
+                ...values,
+                genres: this.state.selectedGenreIds,
+            });
+        }
+
+        if (this.props.handleClose) {
+            this.props.handleClose();
+        }
+    };
+
+    renderStepOne() {
+        return (
+            <Fragment>
                 <div className="fields">
                     <Field
                         name="name"
@@ -123,12 +188,69 @@ class LobbyForm extends React.Component {
                     <button className="btn-close" type="button" onClick={this.props.goBack || this.props.handleClose}>
                         Cancel
                     </button>
+                    <button className="btn-submit" type="button" onClick={this.onClickNext}>
+                        Next
+                    </button>
+                </div>
+            </Fragment>
+        );
+    }
+
+    renderStepTwo() {
+        const showGenreError = this.state.didAttemptGenreSubmit && this.state.selectedGenreIds.length === 0;
+        const noGenresLoaded = this.state.genres.length === 0;
+
+        return (
+            <Fragment>
+                <div className="genre-step">
+                    <div className="genre-step__heading">Choose 1 to 5 genre tags</div>
+
+                    <div className="genre-step__tags">
+                        {this.state.genres.map((genre) => {
+                            const isSelected = this.state.selectedGenreIds.includes(genre.genre_id);
+
+                            return (
+                                <button
+                                    key={genre.genre_id}
+                                    type="button"
+                                    className={`tag ${isSelected ? 'selected' : ''}`}
+                                    onClick={() => this.toggleGenre(genre.genre_id)}
+                                >
+                                    {genre.tag}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {noGenresLoaded ? <div className="genre-step__empty">No genres are currently available.</div> : null}
+
+                    {showGenreError ? <div className="genre-step__error">Please select at least one genre tag.</div> : null}
+                </div>
+
+                <div className="btns">
+                    <button className="btn-close" type="button" onClick={this.onClickBack}>
+                        Back
+                    </button>
                     <button className="btn-submit" type="submit">
                         <Fragment>
                             <Icon name="plus" /> Create Lobby
                         </Fragment>
                     </button>
                 </div>
+            </Fragment>
+        );
+    }
+
+    render() {
+        const currentStep = this.state.step === 1 ? this.renderStepOne() : this.renderStepTwo();
+
+        return (
+            <form className="lobby-form" onSubmit={this.props.handleSubmit(this.onSubmit)}>
+                <div className="header">
+                    <span className="title">Create Your Lobby</span>
+                </div>
+
+                {this.state.isLoadingGenres ? <Loading /> : currentStep}
             </form>
         );
     }
@@ -160,10 +282,12 @@ const validate = (values) => {
     return errors;
 };
 
-export default reduxForm({
-    form: 'lobbyForm',
-    initialValues: {
-        visibility: 'public',
-    },
-    validate,
-})(LobbyForm);
+export default connect(null, { fetchLobbyGenres })(
+    reduxForm({
+        form: 'lobbyForm',
+        initialValues: {
+            visibility: 'public',
+        },
+        validate,
+    })(LobbyForm)
+);

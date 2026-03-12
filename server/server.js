@@ -11,6 +11,7 @@ const passport = require('passport');
 const userRouter = require('./routes/user-route');
 const songsRouter = require('./routes/songs-route');
 const youtubeRoutes = require('./routes/youtube-route');
+const lobbyRoutes = require('./routes/lobby-route');
 
 // Import socket creator
 const initSocket = require('./socket');
@@ -34,10 +35,11 @@ app.use(bodyParser.json());
 const http = require('http').createServer(app);
 initSocket(http);
 
-// Implement books route
+// Implement routes
 app.use('/user', userRouter);
 app.use('/songs', songsRouter);
 app.use('/youtube', youtubeRoutes);
+app.use('/lobby', lobbyRoutes);
 
 // Implement 500 error route
 app.use(function (err, req, res, next) {
