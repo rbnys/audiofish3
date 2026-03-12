@@ -3,7 +3,10 @@ import { connect } from 'react-redux';
 
 import socket from '../socket';
 import Icon from './Icon';
+import LobbyHeader from './LobbyHeader';
+import SongsWindow from './SongsWindow';
 import { setLoading } from '../actions';
+import { selectIsLoggedIn, selectUserId } from '../reducers';
 
 import placeholderImage from '../img/uyuyuy99.png';
 import songPlayingGif from '../img/song_playing.gif';
@@ -80,7 +83,10 @@ class Home extends React.Component {
     render() {
         return (
             <div id="home">
-                <div id="home__header">header</div>
+                <div id="home__header">
+                    {this.props.isLoggedIn ? <SongsWindow /> : null}
+                    <LobbyHeader hideLobbyMeta />
+                </div>
                 <div id="home__body">
                     <div id="home__body__fish">
                         <div id="home__body__fish__title">
@@ -109,4 +115,13 @@ class Home extends React.Component {
     }
 }
 
-export default connect(null, { setLoading })(Home);
+const mapStateToProps = (state) => {
+    return {
+        isLoggedIn: selectIsLoggedIn(state),
+        userId: selectUserId(state),
+    };
+};
+
+export default connect(mapStateToProps, {
+    setLoading,
+})(Home);

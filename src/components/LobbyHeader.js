@@ -49,22 +49,28 @@ class LobbyHeader extends React.Component {
 	}
 
 	render() {
+		const showLobbyMeta = !this.props.hideLobbyMeta;
+
 		return (
 			<div id="lobby-header">
 				<div id="lobby-header__left">
 					<img id="logo-text" src={logoText} alt="AudioFish" />
-					<img className="chevron" src={chevron} alt="" />
-					<div id="lobby-name-box">
-						<div id="lobby-name-box__name">
-							<Icon name="link" />
-							{this.props.lobbyName}
-						</div>
-						<div id="lobby-name-box__online">
-							<div className="icon-online" />
-							<span className="num">{this.props.totalUsersOnline}</span>&nbsp;{this.props.totalUsersOnline > 1 ? `people` : 'person'}{' '}
-							online
-						</div>
-					</div>
+					{showLobbyMeta && (
+						<Fragment>
+							<img className="chevron" src={chevron} alt="" />
+							<div id="lobby-name-box">
+								<div id="lobby-name-box__name">
+									<Icon name="link" />
+									{this.props.lobbyName}
+								</div>
+								<div id="lobby-name-box__online">
+									<div className="icon-online" />
+									<span className="num">{this.props.totalUsersOnline}</span>&nbsp;
+									{this.props.totalUsersOnline > 1 ? `people` : 'person'} online
+								</div>
+							</div>
+						</Fragment>
+					)}
 				</div>
 				<div id="lobby-header__right">{this.renderUserContent()}</div>
 			</div>
