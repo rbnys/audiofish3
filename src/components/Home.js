@@ -46,13 +46,22 @@ class Home extends React.Component {
         this.props.setModalComponent(0, modalContent);
     };
 
+    getFakeThumbnail = (index) => {
+        if (index % 3 === 0) {
+            return "https://i3.ytimg.com/vi/DPGOe4O_tJg/maxresdefault.jpg";
+        } if (index % 3 === 1) {
+            return "https://i3.ytimg.com/vi/pwHuEDCM7xs/hqdefault.jpg";
+        }
+        return "https://i3.ytimg.com/vi/fB63ztKnGvo/maxresdefault.jpg";
+    }
+
     renderLobbies() {
         const lobbyComponents = [];
 
         for (let i = 0; i < 10; i++) {
             lobbyComponents.push(
                 <div className="item" key={i}>
-                    <img className="lobby-icon" src={faker.image.avatar()} width="256" height="256" alt="" />
+                    <div className="lobby-icon" style={{ backgroundImage: `url('${this.getFakeThumbnail(i)}')` }}></div>
                     <div className="content">
                         <div className="header">
                             <div className="title-and-song">
