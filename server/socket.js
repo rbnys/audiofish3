@@ -18,6 +18,8 @@ function upsertLobby(lobby) {
         pathname: lobby.pathname,
         name: lobby.name,
         privacy: lobby.privacy,
+        description: lobby.description || '',
+        tags: Array.isArray(lobby.tags) ? lobby.tags : [],
         owner: { id: ownerId, username: ownerUsername },
         guests: 0,
         djQueue: [],
@@ -37,10 +39,24 @@ async function initSocket(http) {
     lobbies.clear();
 
     const lobbyRows = await knex('user_lobbies')
-        .select(['lobby_id AS id', 'pathname', 'name', 'privacy', 'users.user_id', 'username'])
+        .select(['lobby_id AS id', 'pathname', 'name', 'privacy', 'description', 'users.user_id', 'username'])
         .innerJoin('users', 'users.user_id', 'user_lobbies.user_id');
+
+    const lobbyGenreRows = await knex('lobby_genres')
+        .select(['lobby_genres.lobby_id', 'genres.tag'])
+        .innerJoin('genres', 'genres.genre_id', 'lobby_genres.genre_id')
+        .orderBy('genres.tag', 'asc');
+
+    const tagsByLobbyId = lobbyGenreRows.reduce((acc, row) => {
+        if (!acc.has(row.lobby_id)) {
+            acc.set(row.lobby_id, []);
+        }
+        acc.get(row.lobby_id).push(row.tag);
+        return acc;
+    }, new Map());
+
     lobbyRows.forEach((lobby) => {
-        upsertLobby(lobby);
+        upsertLobby({ ...lobby, tags: tagsByLobbyId.get(lobby.id) || [] });
     });
 
     const io = require('socket.io')(http, {
@@ -95,7 +111,14 @@ async function initSocket(http) {
                 } else {
                     io.to(lobby.pathname).emit('lobby_guests', ++lobby.guests);
                 }
+
+                emitHomeLobbies().catch((err) => console.error(err));
             }
+        });
+
+        socket.on('get_home_lobbies', async () => {
+            const homeLobbies = await getHomeLobbies();
+            socket.emit('home_lobbies', homeLobbies);
         });
 
         socket.on('lobby_chat', (text) => {
@@ -188,6 +211,8 @@ async function initSocket(http) {
                     // If user joined an empty DJ queue, immediately start playing a song
                     playNextSong(lobby);
                 }
+
+                emitHomeLobbies().catch((err) => console.error(err));
             }
         });
 
@@ -197,6 +222,7 @@ async function initSocket(http) {
                 return;
             }
             quitDJing(socket);
+            emitHomeLobbies().catch((err) => console.error(err));
         });
 
         socket.on('grab_song', () => {
@@ -288,9 +314,51 @@ async function initSocket(http) {
 
                 // If user was in the DJ queue, make him leave the queue, and skip his song if he's the one DJ'ing
                 quitDJing(socket);
+                emitHomeLobbies().catch((err) => console.error(err));
             }
         });
     });
+
+    async function emitHomeLobbies() {
+        const homeLobbies = await getHomeLobbies();
+        io.emit('home_lobbies', homeLobbies);
+    }
+
+    async function getHomeLobbies() {
+        const publicLobbies = Array.from(lobbies.values()).filter((lobby) => Number(lobby.privacy) === 0);
+
+        const lobbiesWithCounts = await Promise.all(
+            publicLobbies.map(async (lobby) => {
+                const sockets = await io.in(lobby.pathname).fetchSockets();
+                const onlineCount = sockets.length;
+
+                return {
+                    pathname: lobby.pathname,
+                    name: lobby.name,
+                    description: lobby.description || '',
+                    tags: lobby.tags || [],
+                    djQueue: lobby.djQueue,
+                    currentSong: lobby.currentSong,
+                    onlineCount,
+                    isPlaying: !!lobby.currentSong,
+                };
+            })
+        );
+
+        return lobbiesWithCounts
+            .sort((a, b) => {
+                if (a.isPlaying !== b.isPlaying) {
+                    return Number(b.isPlaying) - Number(a.isPlaying);
+                }
+
+                if (a.onlineCount !== b.onlineCount) {
+                    return b.onlineCount - a.onlineCount;
+                }
+
+                return a.name.localeCompare(b.name);
+            })
+            .map(({ isPlaying, ...lobby }) => lobby);
+    }
 
     // Stops playing the current song (if any), and the next DJ in the queue starts playing
     async function playNextSong(lobby) {
@@ -338,6 +406,7 @@ async function initSocket(http) {
         io.to(lobby.pathname).emit('current_song', { song: lobby.currentSong });
         io.to(lobby.pathname).emit('current_song_votes', lobby.songVotes);
         io.to(lobby.pathname).emit('dj_queue', lobby.djQueue);
+        emitHomeLobbies().catch((err) => console.error(err));
     }
 
     // Make socket quit the DJ queue (if he was in one), and skips the song he was playing (if he was playing one)
@@ -415,7 +484,7 @@ async function initSocket(http) {
 
     // Get all the user data objects for all authenticated clients. Takes either a lobby pathname or lobby object as an argument
     async function getUsersInLobby(lobby) {
-        lobbyName = typeof lobby === 'object' ? lobby.pathname : lobby;
+        const lobbyName = typeof lobby === 'object' ? lobby.pathname : lobby;
         const sockets = await io.in(lobbyName).fetchSockets();
         return sockets.filter((s) => isAuthed(s)).map((s) => s.data.user);
     }

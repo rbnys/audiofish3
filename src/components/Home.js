@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 
 import socket from '../socket';
@@ -13,15 +13,29 @@ import { selectIsLoggedIn, selectUserId } from '../reducers';
 import placeholderImage from '../img/uyuyuy99.png';
 import songPlayingGif from '../img/song_playing.gif';
 
-import { faker } from '@faker-js/faker';
-
 class Home extends React.Component {
     state = {
         searchTerm: '',
+        lobbies: [],
     };
 
     componentDidMount() {
         this.props.setLoading(false);
+
+        socket.on('ready_to_join_lobby', () => {
+            socket.emit('get_home_lobbies');
+        });
+
+        socket.on('home_lobbies', (lobbies) => {
+            this.setState({ lobbies: Array.isArray(lobbies) ? lobbies : [] });
+        });
+
+        socket.emit('get_home_lobbies');
+    }
+
+    componentWillUnmount() {
+        socket.off('ready_to_join_lobby');
+        socket.off('home_lobbies');
     }
 
     // resizeAllGridItems = () => {
@@ -46,54 +60,80 @@ class Home extends React.Component {
         this.props.setModalComponent(0, modalContent);
     };
 
-    getFakeThumbnail = (index) => {
-        if (index % 3 === 0) {
-            return "https://i3.ytimg.com/vi/DPGOe4O_tJg/maxresdefault.jpg";
-        } if (index % 3 === 1) {
-            return "https://i3.ytimg.com/vi/pwHuEDCM7xs/hqdefault.jpg";
+    getThumbnailUrl = (song) => {
+        if (!song || !song.yt_id) {
+            return placeholderImage;
         }
-        return "https://i3.ytimg.com/vi/fB63ztKnGvo/maxresdefault.jpg";
-    }
+
+        return `https://i3.ytimg.com/vi/${song.yt_id}/hqdefault.jpg`;
+    };
+
+    getSongLabel = (song) => {
+        if (!song) {
+            return 'No song currently playing';
+        }
+
+        return `${song.artist || 'Unknown Artist'} - ${song.title || 'Unknown Song'}`;
+    };
 
     renderLobbies() {
-        const lobbyComponents = [];
+        const filteredLobbies = this.state.lobbies.filter((lobby) => {
+            if (!this.state.searchTerm) {
+                return true;
+            }
 
-        for (let i = 0; i < 10; i++) {
-            lobbyComponents.push(
-                <div className="item" key={i}>
-                    <div className="lobby-icon" style={{ backgroundImage: `url('${this.getFakeThumbnail(i)}')` }}></div>
+            const query = this.state.searchTerm.toLowerCase();
+            const searchableText = [lobby.name, lobby.description, ...(lobby.tags || [])].join(' ').toLowerCase();
+            return searchableText.includes(query);
+        });
+
+        if (!filteredLobbies.length) {
+            return <div className="item">No public lobbies found.</div>;
+        }
+
+        return filteredLobbies.map((lobby) => {
+            const tags = Array.isArray(lobby.tags) ? lobby.tags : [];
+            const currentSong = lobby.currentSong || null;
+
+            return (
+                <div className="item" key={lobby.pathname}>
+                    <div className="lobby-icon" style={{ backgroundImage: `url('${this.getThumbnailUrl(currentSong)}')` }}></div>
                     <div className="content">
                         <div className="header">
                             <div className="title-and-song">
-                                <div className="title">The Big Pig's Lobby {i}</div>
+                                <div className="title">{lobby.name}</div>
                                 <div className="song">
-                                    <img src={songPlayingGif} alt="" />
-                                    Darude - Sandstorm (Official Video)
+                                    {currentSong ? <img src={songPlayingGif} alt="Now playing" /> : null}
+                                    {this.getSongLabel(currentSong)}
                                 </div>
                             </div>
                             <div className="user-stats">
                                 <div className="online-count">
-                                    <div className="icon-online" />3 online
+                                    <div className="icon-online" />
+                                    {lobby.onlineCount || 0} online
                                 </div>
                                 <div className="dj-count">
-                                    <Icon name="disk" />2 DJ's
+                                    <Icon name="disk" />
+                                    {(lobby.djQueue || []).length} DJ's
                                 </div>
                             </div>
                         </div>
                         <div className="body">
                             <div className="tags">
-                                <span className="tag">Rock</span>
-                                <span className="tag">Pop</span>
-                                <span className="tag">Rap/Hip Hop</span>
+                                {tags.length
+                                    ? tags.map((tag) => (
+                                          <span className="tag" key={`${lobby.pathname}-${tag}`}>
+                                              {tag}
+                                          </span>
+                                      ))
+                                    : <span className="tag">No tags</span>}
                             </div>
-                            <div className="description">{faker.lorem.paragraphs(Math.floor(Math.random() * 5) + 1, '\r\n\r\n')}</div>
+                            <div className="description">{lobby.description || 'No description provided.'}</div>
                         </div>
                     </div>
                 </div>
             );
-        }
-
-        return lobbyComponents;
+        });
     }
 
     render() {

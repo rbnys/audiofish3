@@ -647,6 +647,8 @@ $pl_controls_padding: 1.2rem;
                     }
 
                     .content {
+                        flex-grow: 1;
+
                         .header {
                             display: flex;
                             height: 64px;

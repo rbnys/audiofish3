@@ -124,11 +124,18 @@ exports.createLobby = async (req, res, next) => {
             return lobby;
         });
 
+        const createdLobbyTags = await knex('lobby_genres')
+            .select('genres.tag')
+            .innerJoin('genres', 'genres.genre_id', 'lobby_genres.genre_id')
+            .where('lobby_genres.lobby_id', createdLobby.lobby_id)
+            .orderBy('genres.tag', 'asc');
+
         upsertLobby({
             ...createdLobby,
             id: createdLobby.lobby_id,
             user_id: req.user.user_id,
             username: req.user.username,
+            tags: createdLobbyTags.map((row) => row.tag),
         });
 
         return res.json(createdLobby);
