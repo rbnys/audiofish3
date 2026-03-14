@@ -10,7 +10,7 @@ import LogInOrSignUp from './LogInOrSignUp';
 import { setLoading, setModalComponent } from '../actions';
 import { selectIsLoggedIn, selectUserId } from '../reducers';
 
-import placeholderImage from '../img/uyuyuy99.png';
+import placeholderImage from '../img/lobby_placeholder.png';
 import songPlayingGif from '../img/song_playing.gif';
 
 class Home extends React.Component {
@@ -60,6 +60,22 @@ class Home extends React.Component {
         this.props.setModalComponent(0, modalContent);
     };
 
+    goToLobby = (pathname) => {
+        if (!pathname) {
+            return;
+        }
+
+        const normalizedPath = String(pathname).replace(/^\/+/, '');
+        window.location.href = `/${normalizedPath}`;
+    };
+
+    onLobbyCardKeyDown = (event, pathname) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            this.goToLobby(pathname);
+        }
+    };
+
     getThumbnailUrl = (song) => {
         if (!song || !song.yt_id) {
             return placeholderImage;
@@ -96,7 +112,14 @@ class Home extends React.Component {
             const currentSong = lobby.currentSong || null;
 
             return (
-                <div className="item" key={lobby.pathname}>
+                <div
+                    className="item"
+                    key={lobby.pathname}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => this.goToLobby(lobby.pathname)}
+                    onKeyDown={(event) => this.onLobbyCardKeyDown(event, lobby.pathname)}
+                >
                     <div className="lobby-icon" style={{ backgroundImage: `url('${this.getThumbnailUrl(currentSong)}')` }}></div>
                     <div className="content">
                         <div className="header">

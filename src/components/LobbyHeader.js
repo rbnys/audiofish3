@@ -54,7 +54,9 @@ class LobbyHeader extends React.Component {
 		return (
 			<div id="lobby-header">
 				<div id="lobby-header__left">
-					<img id="logo-text" src={logoText} alt="AudioFish" />
+					<a href="/" id="logo-text">
+						<img src={logoText} alt="AudioFish" />
+					</a>
 					{showLobbyMeta && (
 						<Fragment>
 							<img className="chevron" src={chevron} alt="" />

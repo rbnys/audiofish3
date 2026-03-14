@@ -626,16 +626,55 @@ $pl_controls_padding: 1.2rem;
 
                 .item {
                     display: flex;
+                    position: relative;
                     max-height: 256px;
                     // flex: 0 0 70rem;
                     width: 82rem;
                     // height: 20rem;
                     margin: 1.4rem;
+                    overflow: hidden;
                     text-align: left;
                     background: var(--color-bg-2);
                     border: 1px solid var(--color-bg-3);
                     border-radius: var(--round-edge);
                     box-shadow: 4px 4px 10px 2px rgba(0, 0, 0, 0.4), inset 0 0 6px 1px rgba(0, 0, 0, 0.6);
+                    cursor: pointer;
+
+                    &::after {
+                        content: 'Join Lobby';
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        font-size: 3.6rem;
+                        font-weight: bold;
+                        font-family: var(--font-main);
+                        letter-spacing: 0.06em;
+                        color: white;
+                        text-shadow: 4px 8px 4px rgba(0, 0, 0, 0.8);
+                        opacity: 0;
+                        pointer-events: none;
+                        transition: opacity 0.25s ease;
+                        z-index: 2;
+                        white-space: nowrap;
+                    }
+
+                    .lobby-icon,
+                    .content {
+                        transition: filter 0.25s ease;
+                    }
+
+                    &:hover,
+                    &:focus-visible {
+                        &::after {
+                            opacity: 1;
+                        }
+
+                        .lobby-icon,
+                        .content {
+                            filter: blur(4px) brightness(0.45);
+                        }
+                    }
 
                     .lobby-icon {
                         min-width: 256px;
@@ -747,6 +786,7 @@ $pl_controls_padding: 1.2rem;
                                     line-height: 1.6rem;
                                     padding: 0.2rem 0.6rem 0.4rem 0.6rem;
                                     margin-right: 1.0rem;
+                                    margin-bottom: 1.0rem;
                                     background: var(--color-bg-3);
                                     border-radius: var(--round-edge);
                                     background-color: var(--color-primary);
@@ -762,7 +802,7 @@ $pl_controls_padding: 1.2rem;
                             .description {
                                 font-size: 1.5rem;
                                 line-height: 2rem;
-                                margin: 1.6rem 1.6rem 1.6rem 1.6rem;
+                                margin: 0.6rem 1.6rem 1.6rem 1.6rem;
                                 white-space: pre-line;
                                 flex: 1 1 auto;
                                 min-height: 0;

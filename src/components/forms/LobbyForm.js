@@ -74,7 +74,7 @@ class LobbyForm extends React.Component {
                 <label className="label">{label}</label>
                 {isUrlField ? (
                     <div className="input url-input-group">
-                        <span className="url-prefix">http://audio.fish/</span>
+                        <span className="url-prefix">http://audiofish.org/</span>
                         <input
                             className={urlInputClassName}
                             {...input}
