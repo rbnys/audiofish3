@@ -17,7 +17,7 @@ const lobbyRoutes = require('./routes/lobby-route');
 const initSocket = require('./socket');
 
 // Set default port for express app
-const PORT = process.env.PORT || 4001;
+const PORT = process.env.PORT || 80;
 
 // Create express app
 const app = express();
@@ -25,7 +25,7 @@ const app = express();
 // Apply middleware
 // Note: Keep this at the top, above routes
 app.use(cors({
-    origin: "https://audiofish-frontend.onrender.com"
+    origin: "https://audiofish.org"
 }));
 app.use(helmet());
 app.use(compression());
