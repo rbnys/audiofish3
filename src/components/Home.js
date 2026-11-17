@@ -55,7 +55,7 @@ class Home extends React.Component {
     //     item.style.gridRowEnd = 'span ' + rowSpan;
     // };
 
-    showEditSongModal = () => {
+    showCreateLobbyModal = () => {
         const modalContent = this.props.isLoggedIn ? (<LobbyForm />) : (<LogInOrSignUp />);
         this.props.setModalComponent(0, modalContent);
     };
@@ -177,7 +177,7 @@ class Home extends React.Component {
                             </div>
                         </div>
                         <div id="home__body__fish__addlobby">
-                            <button className="btn-add-lobby" onClick={this.showEditSongModal}>
+                            <button className="btn-add-lobby" onClick={this.showCreateLobbyModal}>
                                 <Icon name="plus" />
                                 Create Your Lobby
                             </button>

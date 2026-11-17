@@ -85,6 +85,7 @@ class SongsWindow extends React.Component {
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.onResizeBrowserWindow);
+        window.removeEventListener('keydown', this.onKeyDown);
         socket.off('load_song_queue');
         if (this.resizeObserver) this.resizeObserver.disconnect();
         if (this.songsTableReadyTimeout) clearTimeout(this.songsTableReadyTimeout);
