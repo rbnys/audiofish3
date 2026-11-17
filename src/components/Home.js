@@ -7,6 +7,7 @@ import LobbyHeader from './LobbyHeader';
 import SongsWindow from './SongsWindow';
 import LobbyForm from './forms/LobbyForm';
 import LogInOrSignUp from './LogInOrSignUp';
+import ErrorModal from './ErrorModal';
 import { setLoading, setModalComponent } from '../actions';
 import { selectIsLoggedIn, selectUserId } from '../reducers';
 
@@ -17,6 +18,7 @@ class Home extends React.Component {
     state = {
         searchTerm: '',
         lobbies: [],
+        userLobbyCount: 0,
     };
 
     componentDidMount() {
@@ -24,18 +26,25 @@ class Home extends React.Component {
 
         socket.on('ready_to_join_lobby', () => {
             socket.emit('get_home_lobbies');
+            socket.emit('get_user_lobby_count');
         });
 
         socket.on('home_lobbies', (lobbies) => {
             this.setState({ lobbies: Array.isArray(lobbies) ? lobbies : [] });
         });
 
+        socket.on('user_lobby_count', (count) => {
+            this.setState({ userLobbyCount: Number(count) || 0 });
+        });
+
         socket.emit('get_home_lobbies');
+        socket.emit('get_user_lobby_count');
     }
 
     componentWillUnmount() {
         socket.off('ready_to_join_lobby');
         socket.off('home_lobbies');
+        socket.off('user_lobby_count');
     }
 
     // resizeAllGridItems = () => {
@@ -56,7 +65,18 @@ class Home extends React.Component {
     // };
 
     showCreateLobbyModal = () => {
-        const modalContent = this.props.isLoggedIn ? (<LobbyForm />) : (<LogInOrSignUp />);
+        if (!this.props.isLoggedIn) {
+            this.props.setModalComponent(0, <LogInOrSignUp />);
+            return;
+        }
+
+        const modalContent =
+            this.state.userLobbyCount >= 2 ? (
+                <ErrorModal message="You may only own up to 2 lobbies." />
+            ) : (
+                <LobbyForm />
+            );
+
         this.props.setModalComponent(0, modalContent);
     };
 
@@ -169,7 +189,7 @@ class Home extends React.Component {
                 <div id="home__body">
                     <div id="home__body__fish">
                         <div id="home__body__fish__title">
-                            Audio<small>.</small>Fish
+                            AudioFish
                             <div id="home__body__fish__subtitle">
                                 Play music with your friends &amp; everyone around the world.
                                 <br />

@@ -16,17 +16,29 @@ const lobbyRoutes = require('./routes/lobby-route');
 // Import socket creator
 const initSocket = require('./socket');
 
+// Production environment
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+console.log("IS_PRODUCTION: " + IS_PRODUCTION);
+console.log("NODE_ENV: " + process.env.NODE_ENV);
+
 // Set default port for express app
-const PORT = process.env.PORT || 80;
+const PORT = IS_PRODUCTION ? (process.env.PORT || 80) : 4001;
+console.log("PORT: " + PORT);
 
 // Create express app
 const app = express();
 
 // Apply middleware
 // Note: Keep this at the top, above routes
-app.use(cors({
-    origin: "https://audiofish.org"
-}));
+if (IS_PRODUCTION) {
+    app.use(cors({
+        origin: "https://audiofish.org"
+    }));
+} else {
+    app.use(cors({
+        origin: "*"
+    }));
+}
 app.use(helmet());
 app.use(compression());
 app.use(passport.initialize());

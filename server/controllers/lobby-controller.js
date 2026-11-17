@@ -95,6 +95,11 @@ exports.createLobby = async (req, res, next) => {
             return res.status(422).send('That lobby URL is already taken.');
         }
 
+        const ownedLobbies = await knex('user_lobbies').where('user_id', req.user.user_id).count('* as count');
+        if (Number(ownedLobbies[0].count) >= 2) {
+            return res.status(422).send('You may only own up to 2 lobbies.');
+        }
+
         const matchingGenres = await knex('genres').whereIn('genre_id', uniqueGenreIds).select('genre_id');
         if (matchingGenres.length !== uniqueGenreIds.length) {
             return res.status(422).send('One or more selected genre tags are invalid.');

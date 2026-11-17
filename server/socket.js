@@ -121,6 +121,20 @@ async function initSocket(http) {
             socket.emit('home_lobbies', homeLobbies);
         });
 
+        socket.on('get_user_lobby_count', () => {
+            if (!isAuthed(socket)) {
+                return;
+            }
+
+            knex('user_lobbies')
+                .where('user_id', uid(socket))
+                .count('* as count')
+                .then((rows) => {
+                    socket.emit('user_lobby_count', rows[0] ? Number(rows[0].count) : 0);
+                })
+                .catch((err) => console.error(err));
+        });
+
         socket.on('lobby_chat', (text) => {
             if (isAuthed(socket)) {
                 emitToLobby(socket, 'lobby_message', {
