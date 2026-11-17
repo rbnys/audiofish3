@@ -183,7 +183,11 @@ class Home extends React.Component {
         return (
             <div id="home">
                 <div id="home__header">
-                    {this.props.isLoggedIn ? <SongsWindow /> : null}
+                    {this.props.isLoggedIn ? (
+                        <div className="songs-window-container">
+                            <SongsWindow />
+                        </div>
+                    ) : null}
                     <LobbyHeader hideLobbyMeta />
                 </div>
                 <div id="home__body">

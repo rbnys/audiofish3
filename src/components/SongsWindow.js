@@ -206,8 +206,11 @@ class SongsWindow extends React.Component {
 
         // Update the window size & position
         if (fullscreen) {
-            this.width = window.innerWidth;
-            this.songsWindow.updateSize({ width: window.innerWidth, height: window.innerHeight });
+            const viewportWidth = document.documentElement.clientWidth;
+            const viewportHeight = document.documentElement.clientHeight;
+
+            this.width = viewportWidth;
+            this.songsWindow.updateSize({ width: viewportWidth, height: viewportHeight });
             this.songsWindow.updatePosition({ x: 0, y: 0 });
         } else {
             this.width = this.restoredWindowSize.width;

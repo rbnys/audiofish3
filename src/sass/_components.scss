@@ -128,7 +128,7 @@ $pl_controls_padding: 1.2rem;
 }
 
 .modal-overlay {
-    position: absolute;
+    position: fixed;
     z-index: 20;
     top: 0;
     right: 0;
@@ -139,7 +139,7 @@ $pl_controls_padding: 1.2rem;
 
 .modal-wrapper {
     pointer-events: none;
-    position: absolute;
+    position: fixed;
     z-index: 21;
     top: 0;
     right: 0;
@@ -1795,9 +1795,20 @@ $pl_controls_padding: 1.2rem;
     }
 }
 
+.songs-window-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
 .songs-window {
     z-index: 7;
     user-select: none;
+    pointer-events: auto;
 
     &.closed {
         pointer-events: none;
