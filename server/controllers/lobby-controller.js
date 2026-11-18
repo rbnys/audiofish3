@@ -68,7 +68,7 @@ exports.createLobby = async (req, res, next) => {
             return res.status(422).send('URL can only include letters, numbers, underscores, and hyphens.');
         }
 
-        if (visibility !== 'public' && visibility !== 'private') {
+        if (visibility !== 'public' && visibility !== 'unlisted') {
             return res.status(422).send('Please choose a visibility option.');
         }
 
@@ -105,7 +105,7 @@ exports.createLobby = async (req, res, next) => {
             return res.status(422).send('One or more selected genre tags are invalid.');
         }
 
-        const privacy = visibility === 'private' ? 1 : 0;
+        const privacy = visibility === 'unlisted' ? 1 : 0;
 
         const createdLobby = await knex.transaction(async (trx) => {
             const insertedLobby = await trx('user_lobbies').insert({

@@ -19,8 +19,8 @@ const VISIBILITY_OPTIONS = [
         className: 'pl-dropdown__item',
     },
     {
-        value: 'private',
-        label: 'Private',
+        value: 'unlisted',
+        label: 'Unlisted',
         className: 'pl-dropdown__item',
     },
 ];
@@ -436,7 +436,7 @@ const validate = (values) => {
         errors.url = 'URL can only include letters, numbers, underscores, and hyphens.';
     }
 
-    if (!values.visibility || (values.visibility !== 'public' && values.visibility !== 'private')) {
+    if (!values.visibility || (values.visibility !== 'public' && values.visibility !== 'unlisted')) {
         errors.visibility = 'Please choose a visibility option.';
     }
 
