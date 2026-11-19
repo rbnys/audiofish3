@@ -20,6 +20,7 @@ import {
     selectPlaylists,
     selectCurrentPlaylist,
     selectUserById,
+    selectLobbyOwnerId,
 } from '../reducers';
 import socket from '../socket';
 import Icon from './Icon';
@@ -65,6 +66,10 @@ class LobbySongBox extends React.Component {
     downvoteSong = () => {
         socket.emit('downvote_song');
     };
+
+    skipSong = () => {
+        socket.emit('skip_song');
+    }
 
     renderThumb = (props) => {
         const { key, ...restProps } = props;
@@ -212,7 +217,12 @@ class LobbySongBox extends React.Component {
     renderPlayerOverlay() {
         const content =
             this.props.currentSong && !this.state.songEnded ? (
-                <div id="song-progress-bar" style={{ width: `${Math.ceil(this.state.progress * 560)}px` }} />
+                <div>
+                    <div id="song-progress-bar" style={{ width: `${Math.ceil(this.state.progress * 560)}px` }} />
+                    {this.props.lobbyOwnerId === this.props.userId || this.props.imTheDJ ? (
+                        <div id="skip-btn" onClick={this.skipSong}>Skip &nbsp; ≫</div>
+                    ) : null}
+                </div>
             ) : null;
 
         if (!this.props.currentSong) {
@@ -256,6 +266,7 @@ const mapStateToProps = (state) => {
     const grabs = selectCurrentSongGrabs(state);
 
     return {
+        userId,
         currentSong,
         currentDJ: currentSong ? selectUserById(state, currentSong.user_id) : null,
         imTheDJ: currentSong && isLoggedIn && userId === currentSong.user_id,
@@ -268,6 +279,7 @@ const mapStateToProps = (state) => {
         volume: selectIsMuted(state) ? 0 : selectVolume(state),
         playlists: selectPlaylists(state),
         currentPlaylist: selectCurrentPlaylist(state),
+        lobbyOwnerId: selectLobbyOwnerId(state),
     };
 };
 

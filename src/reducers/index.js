@@ -53,6 +53,8 @@ export const selectIsSongTableLoading = (state) => state.isSongTableLoading;
 export const selectModalComponents = (state) => state.modalComponents;
 export const selectIsLobbyLoaded = (state) => !!state.lobby.pathname;
 export const selectLobbyName = (state) => state.lobby.name;
+export const selectLobbyOwnerId = (state) => state.lobby.owner.id;
+export const selectLobbyOwnerUsername = (state) => state.lobby.owner.username;
 export const selectUsers = (state) => state.users;
 export const selectLobbyGuests = (state) => state.lobbyGuests;
 export const selectSongs = (state) => state.songs;

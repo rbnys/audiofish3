@@ -315,6 +315,19 @@ async function initSocket(http) {
             }
         });
 
+        socket.on('skip_song', () => {
+            if (isAuthed(socket) && isInLobby(socket)) {
+                const lobby = socket.data.lobby;
+                const userId = uid(socket);
+
+                if (lobby.currentSong && (lobby.currentSong.user_id === userId || lobby.owner.id === userId)) {
+                    // Skip the current song
+                    lobby.djQueue.push(lobby.djQueue.shift()); // Rotate the DJ queue
+                    playNextSong(lobby);
+                }
+            }
+        });
+
         socket.on('disconnect', function () {
             const { lobby } = socket.data;
 

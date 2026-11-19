@@ -1164,6 +1164,10 @@ $pl_controls_padding: 1.2rem;
                         bottom: -8px;
                         height: 8px;
                     }
+
+                    #skip-btn {
+                        visibility: visible;
+                    }
                 }
 
                 &.dark {
@@ -1193,6 +1197,32 @@ $pl_controls_padding: 1.2rem;
                     z-index: 2;
                     background: var(--color-primary-light);
                     transition: background-color 0.3s, bottom 0.3s, height 0.3s;
+                }
+
+                #skip-btn {
+                    visibility: hidden;
+                    position: absolute;
+                    bottom: 0;
+                    right: 0;
+                    z-index: 3;
+                    padding: 0.6rem 1.2rem;
+                    font-size: 2.4rem;
+                    // font-weight: bold;
+                    padding: 2.4rem 2.0rem;
+                    background: rgba(100, 100, 100, 0.77);
+                    color: rgb(212, 212, 212);
+                    // border: 1px solid rgba(0, 0, 0, 0.5);
+                    border-radius: 4px 0 0 0;
+                    box-shadow: none;
+                    cursor: pointer;
+
+                    &:hover {
+                       background: rgba(100, 100, 100, 1);
+                    }
+
+                    &:active {
+                        transform: translateY(2px);
+                    }
                 }
             }
         }
