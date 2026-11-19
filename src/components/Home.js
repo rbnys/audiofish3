@@ -124,7 +124,15 @@ class Home extends React.Component {
         });
 
         if (!filteredLobbies.length) {
-            return <div className="item">No public lobbies found.</div>;
+            return <div style={{
+                textAlign: 'center',
+                fontSize: '20px',
+                fontStyle: 'italic',
+                color: '#888',
+                marginTop: '20px',
+            }}>
+                No public lobbies found.
+            </div>;
         }
 
         return filteredLobbies.map((lobby) => {
