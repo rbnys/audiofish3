@@ -328,21 +328,12 @@ async function initSocket(http) {
             }
         });
 
+        socket.on('leave_lobby', () => {
+            leaveLobby(socket);
+        });
+
         socket.on('disconnect', function () {
-            const { lobby } = socket.data;
-
-            if (lobby && lobby.pathname) {
-                // Let the other users in the lobby know he's left
-                if (isAuthed(socket)) {
-                    io.to(lobby.pathname).emit('user_left_lobby', uid(socket));
-                } else {
-                    io.to(lobby.pathname).emit('lobby_guests', --lobby.guests);
-                }
-
-                // If user was in the DJ queue, make him leave the queue, and skip his song if he's the one DJ'ing
-                quitDJing(socket);
-                emitHomeLobbies().catch((err) => console.error(err));
-            }
+            leaveLobby(socket);
         });
     });
 
@@ -433,6 +424,31 @@ async function initSocket(http) {
         io.to(lobby.pathname).emit('current_song', { song: lobby.currentSong });
         io.to(lobby.pathname).emit('current_song_votes', lobby.songVotes);
         io.to(lobby.pathname).emit('dj_queue', lobby.djQueue);
+        emitHomeLobbies().catch((err) => console.error(err));
+    }
+
+    // Remove the socket from its current lobby, notifying the other users, quitting the DJ queue if needed
+    function leaveLobby(socket) {
+        const { lobby } = socket.data;
+
+        if (!lobby || !lobby.pathname) {
+            return;
+        }
+
+        // Let the other users in the lobby know he's left
+        if (isAuthed(socket)) {
+            io.to(lobby.pathname).emit('user_left_lobby', uid(socket));
+        } else {
+            io.to(lobby.pathname).emit('lobby_guests', --lobby.guests);
+        }
+
+        // If user was in the DJ queue, make him leave the queue, and skip his song if he's the one DJ'ing
+        quitDJing(socket);
+
+        // Stop receiving events from this lobby's room
+        socket.leave(lobby.pathname);
+        socket.data.lobby = null;
+
         emitHomeLobbies().catch((err) => console.error(err));
     }
 

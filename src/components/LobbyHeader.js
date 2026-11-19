@@ -1,5 +1,6 @@
 import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 import LogInOrSignUp from './LogInOrSignUp';
 import { setModalComponent, signUp, signIn, signOut, setLoading, openSongsWindow } from '../actions';
@@ -54,9 +55,9 @@ class LobbyHeader extends React.Component {
 		return (
 			<div id="lobby-header">
 				<div id="lobby-header__left">
-					<a href="/" id="logo-text">
+					<Link to="/" id="logo-text">
 						<img src={logoText} alt="AudioFish" />
-					</a>
+					</Link>
 					{showLobbyMeta && (
 						<Fragment>
 							<img className="chevron" src={chevron} alt="" />

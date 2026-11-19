@@ -121,6 +121,8 @@ class Lobby extends React.Component {
     }
 
     componentWillUnmount() {
+        socket.emit('leave_lobby');
+
         socket.off('ready_to_join_lobby');
         socket.off('lobby_info');
         socket.off('current_song');
