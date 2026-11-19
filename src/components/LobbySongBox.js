@@ -53,6 +53,12 @@ class LobbySongBox extends React.Component {
         }
     };
 
+    handlePlayerReady = () => {
+        if (this.playerRef.current) {
+            this.playerRef.current.seekTo(this.props.currentSong.startSecs ?? 0);
+        }
+    }
+
     grabSong = () => {
         if (this.props.currentSong) {
             this.props.setModalComponent(0, <GrabSong song={this.props.currentSong} onSubmit={this.handleGrabSongSubmit} />);
@@ -210,6 +216,7 @@ class LobbySongBox extends React.Component {
                 onEnded={() => this.setState({ songEnded: true })}
                 progressInterval={33}
                 onProgress={(progress) => this.setState({ progress: progress.played, progressSecs: progress.playedSeconds })}
+                onReady={this.handlePlayerReady}
             />
         );
     }
