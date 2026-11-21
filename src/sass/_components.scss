@@ -2633,6 +2633,39 @@ $pl_controls_padding: 1.2rem;
         align-items: stretch;
         font-size: 2rem;
 
+        .platform-dropdown {
+            margin-right: 1rem;
+            
+            &__placeholder {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: $height;
+            }
+
+            .option {
+                display: flex;
+                align-items: center;
+                padding: 1.4rem 1rem;
+
+                .icon {
+                    margin-right: 1.2rem;
+                }
+            }
+
+            .icon {
+                width: $height * 0.7;
+                height: $height * 0.7;
+                fill: var(--color-text-primary);
+            }
+
+            .icon-tag-link {
+                width: $height * 0.5;
+                height: $height * 0.5;
+                fill: var(--color-text-primary);
+            }
+        }
+
         .pl-or-video-dropdown {
             margin-right: 1rem;
         }

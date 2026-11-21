@@ -4,7 +4,7 @@ import sprite from '../img/sprite.svg';
 
 const Icon = (props) => {
 	return (
-		<svg {...props} className={`icon ${props.className ? props.className : ''}`}>
+		<svg {...props} className={`icon icon-tag-${props.name}`}>
 			<use href={`${sprite}#icon-${props.name}`} />
 		</svg>
 	);

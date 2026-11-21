@@ -56,6 +56,10 @@ class LobbySongBox extends React.Component {
     handlePlayerReady = () => {
         if (this.playerRef.current) {
             this.playerRef.current.seekTo(this.props.currentSong.startSecs ?? 0);
+
+            if (this.props.currentSong.platform === 'custom_audio') {
+                
+            }
         }
     }
 
@@ -76,6 +80,16 @@ class LobbySongBox extends React.Component {
     skipSong = () => {
         socket.emit('skip_song');
     }
+
+    getSongUrl = (song) => {
+        if (song.platform === 'yt') {
+            return `https://www.youtube.com/watch?v=${song.yt_id}`;
+        }
+        if (song.platform === 'custom_audio') {
+            return song.url;
+        }
+        return null;
+    };
 
     renderThumb = (props) => {
         const { key, ...restProps } = props;
@@ -197,26 +211,26 @@ class LobbySongBox extends React.Component {
             <ReactPlayer
                 id="player"
                 ref={this.playerRef}
-                url={`https://www.youtube.com/watch?v=${this.props.currentSong.yt_id}`}
+                url={this.getSongUrl(this.props.currentSong)}
                 playing={true}
                 volume={this.props.volume / 100}
                 width="560px"
                 height="315px"
-                config={{
+                config={this.props.currentSong.platform === 'yt' ? {
                     youtube: {
                         playerVars: {
                             modestBranding: 1,
                         },
                         start: this.props.currentSong.startSecs ?? 0,
                     },
-                }}
+                } : { file: { forceAudio: true } }}
                 onStart={() => {
-                    this.setState({ songEnded: false })
+                    this.setState({ songEnded: false });
+                    this.handlePlayerReady();
                 }}
                 onEnded={() => this.setState({ songEnded: true })}
                 progressInterval={33}
                 onProgress={(progress) => this.setState({ progress: progress.played, progressSecs: progress.playedSeconds })}
-                onReady={this.handlePlayerReady}
             />
         );
     }

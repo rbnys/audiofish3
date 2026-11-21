@@ -16,6 +16,7 @@ import { parseYoutubeVideoIdFromURL, parseYoutubePlaylistIdFromURL, readableTime
 
 class AddSong extends React.Component {
     state = {
+        platform: 'yt',
         searchTerm: '',
         searchType: 'video',
         videos: [],
@@ -129,6 +130,64 @@ class AddSong extends React.Component {
         }
     };
 
+    renderPlatformDropdown() {
+        const options = [
+            {
+                value: 'yt',
+                label: (
+                    <Fragment><Icon name="youtube-color" /> YouTube</Fragment>
+                ),
+                className: 'option'
+            },
+            {
+                value: 'custom_audio',
+                label: (
+                    <Fragment><Icon name="link" /> Custom MP3</Fragment>
+                ),
+                className: 'option'
+            },
+        ];
+
+        const shortLabels = {
+            yt: <Icon name="youtube-color" />,
+            custom_audio: <Icon name="link" />,
+        };
+
+        // Handle both string state ('yt') and object state ({ value: 'yt', ... })
+        const currentValue = typeof this.state.platform === 'object'
+            ? this.state.platform.value
+            : this.state.platform;
+
+        const selectedOption = currentValue
+            ? { value: currentValue, label: shortLabels[currentValue] }
+            : null;
+
+
+        return (
+            <Dropdown
+                className="platform-dropdown"
+                placeholderClassName="platform-dropdown__placeholder"
+                options={options}
+                value={selectedOption}
+                onChange={(option) => {
+                    if (currentValue !== option.value) {
+                        this.setState({
+                            platform: option.value,
+                            searchTerm: '',
+                            videos: [],
+                            playlists: []
+                        });
+                    } else {
+                        this.setState({ platform: option.value });
+                    }
+                    setTimeout(() => {
+                        if (this.textInputRef.current) this.textInputRef.current.focus();
+                    });
+                }}
+            />
+        );
+    }
+
     renderSearchTypeDropdown() {
         const options = [
             { value: 'video', label: 'Videos' },
@@ -145,7 +204,6 @@ class AddSong extends React.Component {
                     if (this.state.searchType !== option.value) {
                         this.setState({ searchType: option.value, searchTerm: '', videos: [], playlists: [] });
                     }
-
                     setTimeout(() => {
                         if (this.textInputRef.current) this.textInputRef.current.focus();
                     });
@@ -311,6 +369,7 @@ class AddSong extends React.Component {
             <Fragment>
                 <div className="add-song">
                     <form onSubmit={(e) => this.onSearchSubmit(e)}>
+                        {this.renderPlatformDropdown()}
                         {this.renderSearchTypeDropdown()}
                         <input
                             ref={this.textInputRef}

@@ -401,6 +401,13 @@ async function initSocket(http) {
                         .where({ song_id: songQueue.shift() })
                         .first();
 
+                    // FOR TESTING PURPOSES - change every song to custom MP3 on client-side (will remove later)
+                    if (process.env.NODE_ENV === 'development' && nextSong) {
+                        nextSong.length = 271;
+                        nextSong.yt_id = null;
+                        nextSong.platform = 'custom_audio';
+                        nextSong.url = 'https://www.dropbox.com/scl/fi/kwxaabtzxegd9sfj87jdx/Burning-For-You.mp3?rlkey=3ojorv0reh0swjnofrxy9d663&raw=1';
+                    }
                     if (nextSong) break;
                 }
             }
