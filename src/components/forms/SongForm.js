@@ -14,9 +14,10 @@ class SongForm extends React.Component {
             return <input {...input} type={type} />;
         }
 
-        const inputClassName = `input ${meta.error ? 'error' : ''}`;
+        const showError = meta.error && meta.touched;
+        const inputClassName = `input ${showError ? 'error' : ''}`;
         // const autoComplete = input.name === "artist" ? "on" : "off";
-        const errorMessage = meta.error ? <div className="error-msg">{meta.error}</div> : null;
+        const errorMessage = showError ? <div className="error-msg">{meta.error}</div> : null;
 
         return (
             <div className="field">

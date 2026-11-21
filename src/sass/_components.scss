@@ -2471,6 +2471,7 @@ $pl_controls_padding: 1.2rem;
             }
 
             .thumbnail.audio-thumbnail {
+                position: relative;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -2482,9 +2483,13 @@ $pl_controls_padding: 1.2rem;
                     fill: var(--color-primary-light);
                 }
 
+                &:hover .preview {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                }
+
                 &:hover .preview .icon {
-                    display: inline-block;
-                    height: 5%;
                     fill: var(--color-button-dark);
                 }
             }

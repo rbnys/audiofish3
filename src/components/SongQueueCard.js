@@ -11,6 +11,13 @@ const SongQueueCard = (props) => {
 
     const songId = props.item;
     const song = props.songs.find((s) => s.song_id === songId);
+    const isCustomAudio = song.platform === 'custom_audio';
+
+    const openAudioUrl = () => {
+        if (song.url) {
+            window.open(song.url, '_blank', 'noopener,noreferrer');
+        }
+    };
 
     const titleCellStyle = small ? { flexGrow: '1', flexShrink: '1', flexBasis: '100%', paddingRight: '2.4rem' } : {};
     const titleTextStyle = small ? { marginRight: '0' } : {};
@@ -26,26 +33,44 @@ const SongQueueCard = (props) => {
             title={`${song.artist} - ${song.title}`}
         >
             <div className="cell cell-btn">
-                <div
-                    className="thumbnail"
-                    title="Preview"
-                    style={{ backgroundImage: `url(http://i.ytimg.com/vi/${song.yt_id}/default.jpg)` }}
-                >
-                    <button
-                        className="preview"
-                        title="Preview song"
-                        draggable={true}
-                        onDragStart={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                        }}
-                        onClick={() => {
-                            props.setModalComponent(0, <SongPreview song={song} />);
-                        }}
+                {isCustomAudio ? (
+                    <div className="thumbnail audio-thumbnail" title="Open audio URL">
+                        <Icon name="audio-visualizer" />
+                        <button
+                            className="preview"
+                            title="Open audio URL"
+                            draggable={true}
+                            onDragStart={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }}
+                            onClick={openAudioUrl}
+                        >
+                            <Icon name="link" />
+                        </button>
+                    </div>
+                ) : (
+                    <div
+                        className="thumbnail"
+                        title="Preview"
+                        style={{ backgroundImage: `url(http://i.ytimg.com/vi/${song.yt_id}/default.jpg)` }}
                     >
-                        <Icon name="youtube" />
-                    </button>
-                </div>
+                        <button
+                            className="preview"
+                            title="Preview song"
+                            draggable={true}
+                            onDragStart={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }}
+                            onClick={() => {
+                                props.setModalComponent(0, <SongPreview song={song} />);
+                            }}
+                        >
+                            <Icon name="youtube" />
+                        </button>
+                    </div>
+                )}
             </div>
             <div className="cell cell-title" style={titleCellStyle}>
                 <span className="title" style={titleTextStyle}>
