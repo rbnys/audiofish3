@@ -33,31 +33,36 @@ class AddSong extends React.Component {
 
         this.setState({ loading: true });
 
-        if (this.state.searchType === 'video') {
-            axios
-                .post(`${serverIP}/youtube/search-videos`, { query: this.state.searchTerm }, this.props.authHeader)
-                .then((res) => {
-                    // console.log(res.data.videos);
-                    if (res.data.videos) {
-                        this.setState({ videos: res.data.videos });
-                    }
-                })
-                .catch((err) => console.error(err))
-                .finally(() => this.setState({ loading: false }));
-        } else if (this.state.searchType === 'playlist') {
-            axios
-                .post(`${serverIP}/youtube/search-playlists`, { query: this.state.searchTerm }, this.props.authHeader)
-                .then((res) => {
-                    console.log(res.data.playlists);
-                    if (res.data.playlists) {
-                        this.setState({ playlists: res.data.playlists });
-                        res.data.playlists.forEach((pl) => {
-                            console.log(pl.id.length);
-                        });
-                    }
-                })
-                .catch((err) => console.error(err))
-                .finally(() => this.setState({ loading: false }));
+        if (this.state.platform === 'yt') {
+            if (this.state.searchType === 'video') {
+                axios
+                    .post(`${serverIP}/youtube/search-videos`, { query: this.state.searchTerm }, this.props.authHeader)
+                    .then((res) => {
+                        // console.log(res.data.videos);
+                        if (res.data.videos) {
+                            this.setState({ videos: res.data.videos });
+                        }
+                    })
+                    .catch((err) => console.error(err))
+                    .finally(() => this.setState({ loading: false }));
+            } else if (this.state.searchType === 'playlist') {
+                axios
+                    .post(`${serverIP}/youtube/search-playlists`, { query: this.state.searchTerm }, this.props.authHeader)
+                    .then((res) => {
+                        console.log(res.data.playlists);
+                        if (res.data.playlists) {
+                            this.setState({ playlists: res.data.playlists });
+                            res.data.playlists.forEach((pl) => {
+                                console.log(pl.id.length);
+                            });
+                        }
+                    })
+                    .catch((err) => console.error(err))
+                    .finally(() => this.setState({ loading: false }));
+            }
+        }
+        else if (this.state.platform === 'custom_audio') {
+            // For custom audio, verify the URL is valid and points to a raw audio file (MP3, WAV, etc.)
         }
     };
 
@@ -189,6 +194,10 @@ class AddSong extends React.Component {
     }
 
     renderSearchTypeDropdown() {
+        if (this.state.platform === 'custom_audio') {
+            return null;
+        }
+
         const options = [
             { value: 'video', label: 'Videos' },
             { value: 'playlist', label: 'Playlists' },
@@ -210,6 +219,51 @@ class AddSong extends React.Component {
                 }}
             />
         );
+    }
+
+    renderTextInput() {
+        if (this.state.platform === 'yt') {
+            return (
+                <input
+                    ref={this.textInputRef}
+                    placeholder="Search YouTube or paste URL..."
+                    type="text"
+                    value={this.state.searchTerm}
+                    onChange={(e) => this.onSearchTermChange(e)}
+                    onPaste={(e) => this.parseURLForId(e)}
+                    autoFocus
+                />
+            );
+        } else if (this.state.platform === 'custom_audio') {
+            return (
+                <input
+                    ref={this.textInputRef}
+                    placeholder="Paste URL to raw audio file (MP3, WAV, etc.)"
+                    type="text"
+                    value={this.state.searchTerm}
+                    onChange={(e) => this.onSearchTermChange(e)}
+                    autoFocus
+                />
+            );
+        }
+    }
+
+    renderSubmitButton() {
+        if (this.state.platform === 'yt') {
+            return (
+                <button type="submit">
+                    <Icon name="search" />
+                    Search
+                </button>
+            );
+        } else if (this.state.platform === 'custom_audio') {
+            return (
+                <button type="submit">
+                    <Icon name="plus" />
+                    Add Song
+                </button>
+            );
+        }
     }
 
     renderSearchResults() {
@@ -371,19 +425,8 @@ class AddSong extends React.Component {
                     <form onSubmit={(e) => this.onSearchSubmit(e)}>
                         {this.renderPlatformDropdown()}
                         {this.renderSearchTypeDropdown()}
-                        <input
-                            ref={this.textInputRef}
-                            placeholder="Search YouTube or paste URL..."
-                            type="text"
-                            value={this.state.searchTerm}
-                            onChange={(e) => this.onSearchTermChange(e)}
-                            onPaste={(e) => this.parseURLForId(e)}
-                            autoFocus
-                        />
-                        <button type="submit">
-                            <Icon name="search" />
-                            Search
-                        </button>
+                        {this.renderTextInput()}
+                        {this.renderSubmitButton()}
                     </form>
                     {this.renderSearchResults()}
                 </div>

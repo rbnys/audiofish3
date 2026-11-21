@@ -23,6 +23,7 @@ import {
     selectLobbyOwnerId,
 } from '../reducers';
 import socket from '../socket';
+import AudioVisualizer from './AudioVisualizer';
 import Icon from './Icon';
 import SongForm from './forms/SongForm';
 import GrabSong from './GrabSong';
@@ -55,11 +56,7 @@ class LobbySongBox extends React.Component {
 
     handlePlayerReady = () => {
         if (this.playerRef.current) {
-            this.playerRef.current.seekTo(this.props.currentSong.startSecs ?? 0);
-
-            if (this.props.currentSong.platform === 'custom_audio') {
-                
-            }
+            this.playerRef.current.seekTo(this.props.currentSong.startSecs ?? 0, 'seconds');
         }
     }
 
@@ -204,26 +201,42 @@ class LobbySongBox extends React.Component {
     }
 
     renderPlayer() {
-        if (!this.props.currentSong) {
+        const song = this.props.currentSong;
+        if (!song) {
             return null;
         }
+
+        if (song.platform === 'custom_audio') {
+            return (
+                <AudioVisualizer
+                    key={song.song_id}
+                    url={song.url}
+                    volume={this.props.volume / 100}
+                    startSecs={song.startSecs ?? 0}
+                    onStart={() => this.setState({ songEnded: false })}
+                    onEnded={() => this.setState({ songEnded: true })}
+                    onProgress={(progress) => this.setState({ progress: progress.played, progressSecs: progress.playedSeconds })}
+                />
+            );
+        }
+
         return (
             <ReactPlayer
                 id="player"
                 ref={this.playerRef}
-                url={this.getSongUrl(this.props.currentSong)}
+                url={this.getSongUrl(song)}
                 playing={true}
                 volume={this.props.volume / 100}
                 width="560px"
                 height="315px"
-                config={this.props.currentSong.platform === 'yt' ? {
+                config={{
                     youtube: {
                         playerVars: {
                             modestBranding: 1,
                         },
-                        start: this.props.currentSong.startSecs ?? 0,
+                        start: song.startSecs ?? 0,
                     },
-                } : { file: { forceAudio: true } }}
+                }}
                 onStart={() => {
                     this.setState({ songEnded: false });
                     this.handlePlayerReady();
