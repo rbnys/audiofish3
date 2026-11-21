@@ -13,6 +13,7 @@ import {
 
 import serverIP from '../server';
 import socket from '../socket';
+import ErrorModal from '../components/ErrorModal';
 
 export const signUp = (username, password) => {
     return async (dispatch) => {
@@ -307,6 +308,8 @@ export const addSong = (values) => {
                     title: values.title,
                     artist: values.artist,
                     length: values.length,
+                    platform: values.platform,
+                    url: values.url,
                     pos: songs.length ? songs[0].pos - 1 : 0,
                 },
                 { headers: selectAuthHeader(getState()) }
@@ -319,7 +322,14 @@ export const addSong = (values) => {
                 }
                 dispatch({ type: 'SET_SONGS_FILTER', payload: '' });
             })
-            .catch((error) => console.error(`Error adding song to playlist: ${error}`))
+            .catch((error) => {
+                const message = error.response && error.response.data && error.response.data.error
+                    ? error.response.data.error
+                    : 'There was a problem adding this song. Please try again.';
+
+                dispatch(setModalComponent(2, <ErrorModal message={message} />));
+                console.error(`Error adding song to playlist: ${error}`);
+            })
             .finally(() => {
                 dispatch({ type: 'SET_SONG_TABLE_LOADING', payload: false });
             });

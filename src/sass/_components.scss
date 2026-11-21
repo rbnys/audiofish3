@@ -2470,6 +2470,25 @@ $pl_controls_padding: 1.2rem;
                 }
             }
 
+            .thumbnail.audio-thumbnail {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background-color: #111318;
+
+                > .icon {
+                    width: 100%;
+                    height: 100%;
+                    fill: var(--color-primary-light);
+                }
+
+                &:hover .preview .icon {
+                    display: inline-block;
+                    height: 5%;
+                    fill: var(--color-button-dark);
+                }
+            }
+
             .preview {
                 visibility: hidden;
 

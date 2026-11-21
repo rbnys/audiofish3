@@ -11,9 +11,16 @@ import DeleteSongForm from './forms/DeleteSongForm';
 
 const SongDetails = (props) => {
     const { song, style, small } = props;
+    const isCustomAudio = song.platform === 'custom_audio';
 
     const previewSong = () => {
         props.setModalComponent(0, <SongPreview song={song} />);
+    };
+
+    const openAudioUrl = () => {
+        if (song.url) {
+            window.open(song.url, '_blank', 'noopener,noreferrer');
+        }
     };
 
     const handleEditSongSubmit = (values) => {
@@ -59,15 +66,24 @@ const SongDetails = (props) => {
                 )}
             </div>
             <div className="cell cell-btn">
-                <div
-                    className="thumbnail"
-                    title="Preview"
-                    style={{ backgroundImage: `url(http://i.ytimg.com/vi/${song.yt_id}/default.jpg)` }}
-                >
-                    <button className="preview" onClick={previewSong}>
-                        <Icon name="youtube" />
-                    </button>
-                </div>
+                {isCustomAudio ? (
+                    <div className="thumbnail audio-thumbnail" title="Open audio URL">
+                        <Icon name="audio-visualizer" />
+                        <button className="preview" onClick={openAudioUrl}>
+                            <Icon name="link" />
+                        </button>
+                    </div>
+                ) : (
+                    <div
+                        className="thumbnail"
+                        title="Preview"
+                        style={{ backgroundImage: `url(http://i.ytimg.com/vi/${song.yt_id}/default.jpg)` }}
+                    >
+                        <button className="preview" onClick={previewSong}>
+                            <Icon name="youtube" />
+                        </button>
+                    </div>
+                )}
             </div>
             <div className="cell cell-title" style={titleCellStyle}>
                 <span className="title" style={titleTextStyle}>

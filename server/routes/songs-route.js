@@ -13,6 +13,7 @@ router.post('/create-playlist', requireAuth, songRoutes.createPlaylist);
 router.post('/edit-playlist', requireAuth, songRoutes.editPlaylist);
 router.post('/delete-playlist', requireAuth, songRoutes.deletePlaylist);
 router.post('/add-song', requireAuth, songRoutes.addSongToPlaylist);
+router.post('/verify-audio-file', requireAuth, songRoutes.verifyAudioFile);
 router.post('/add-yt-playlist', requireAuth, songRoutes.addSongsFromYoutubePlaylist);
 router.post('/edit-song', requireAuth, songRoutes.editSong);
 router.post('/delete-song', requireAuth, songRoutes.deleteSong);

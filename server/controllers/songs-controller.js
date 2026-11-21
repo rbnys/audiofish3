@@ -1,6 +1,7 @@
 const knex = require('../db');
 const { youtube, YOUTUBE_KEY } = require('../apis/youtube');
 const { parse, toSeconds } = require('iso8601-duration');
+const { verifyAudioFileUrl, fetchAudioFileMetadata } = require('../services/audio-file');
 
 exports.getPlaylistsFromUser = async (req, res) => {
     knex('user_playlists')
@@ -79,29 +80,47 @@ exports.deletePlaylist = async (req) => {
         });
 };
 
+exports.verifyAudioFile = async (req, res) => {
+    try {
+        const result = await verifyAudioFileUrl(req.body.url);
+        res.json(result);
+    } catch (err) {
+        console.error(err);
+        res.json({ success: false, errorMsg: 'Could not verify this audio file.' });
+    }
+};
+
 exports.addSongToPlaylist = async (req, res) => {
-    knex('playlist_songs')
-        .insert({
+    try {
+        const song = {
             playlist_id: req.body.playlist,
-            yt_id: req.body.videoId,
             artist: req.body.artist,
             title: req.body.title,
-            length: req.body.length,
             pos: req.body.pos,
-        })
-        .then((insertedSong) => {
-            knex('playlist_songs')
-                .where('song_id', insertedSong[0])
-                .then((song) => {
-                    res.json(song[0]);
-                })
-                .catch((err) => {
-                    console.error(err);
-                });
-        })
-        .catch((err) => {
-            console.error(err);
-        });
+        };
+
+        if (req.body.platform === 'custom_audio') {
+            const audio = await fetchAudioFileMetadata(req.body.url);
+
+            if (!audio.success) {
+                return res.status(400).json({ error: audio.errorMsg });
+            }
+
+            song.platform = 'custom_audio';
+            song.url = req.body.url;
+            song.length = audio.duration;
+        } else {
+            song.yt_id = req.body.videoId;
+            song.length = req.body.length;
+        }
+
+        const insertedSong = await knex('playlist_songs').insert(song);
+        const createdSong = await knex('playlist_songs').where('song_id', insertedSong[0]);
+        res.json(createdSong[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'There was a problem adding this song.' });
+    }
 };
 
 exports.addSongsFromYoutubePlaylist = async (req, res) => {

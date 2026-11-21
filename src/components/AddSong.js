@@ -23,6 +23,7 @@ class AddSong extends React.Component {
         playlists: [],
         videoSelected: null,
         playlistSelected: null,
+        customAudioSelected: null,
         loading: false,
     };
 
@@ -62,7 +63,45 @@ class AddSong extends React.Component {
             }
         }
         else if (this.state.platform === 'custom_audio') {
-            // For custom audio, verify the URL is valid and points to a raw audio file (MP3, WAV, etc.)
+            const url = this.state.searchTerm.trim();
+
+            if (!url) {
+                this.setState({ loading: false });
+                this.props.setModalComponent(2, <ErrorModal message="Please enter a URL to an audio file." />);
+                return;
+            }
+
+            let isHttpUrl = false;
+            try {
+                const parsedUrl = new URL(url);
+                isHttpUrl = parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+            } catch (err) {
+                isHttpUrl = false;
+            }
+
+            if (!isHttpUrl) {
+                this.setState({ loading: false });
+                this.props.setModalComponent(2, <ErrorModal message="That doesn't look like a valid URL. Make sure it starts with http:// or https://." />);
+                return;
+            }
+
+            axios
+                .post(`${serverIP}/songs/verify-audio-file`, { url }, this.props.authHeader)
+                .then((res) => {
+                    if (res.data && res.data.success) {
+                        this.setState({ customAudioSelected: url });
+                    } else {
+                        this.props.setModalComponent(
+                            2,
+                            <ErrorModal message={res.data && res.data.errorMsg ? res.data.errorMsg : 'This URL does not point to a valid audio file.'} />
+                        );
+                    }
+                })
+                .catch((err) => {
+                    console.error(err);
+                    this.props.setModalComponent(2, <ErrorModal message="Could not verify this audio file. Please try again." />);
+                })
+                .finally(() => this.setState({ loading: false }));
         }
     };
 
@@ -147,7 +186,7 @@ class AddSong extends React.Component {
             {
                 value: 'custom_audio',
                 label: (
-                    <Fragment><Icon name="link" /> Custom MP3</Fragment>
+                    <Fragment><Icon name="link" /> Custom Audio</Fragment>
                 ),
                 className: 'option'
             },
@@ -345,7 +384,15 @@ class AddSong extends React.Component {
     }
 
     handleSubmit = (values) => {
-        this.props.addSong(values);
+        if (this.state.customAudioSelected) {
+            this.props.addSong({
+                ...values,
+                platform: 'custom_audio',
+                url: this.state.customAudioSelected,
+            });
+        } else {
+            this.props.addSong(values);
+        }
     };
 
     handleSubmitMultiple = (values) => {
@@ -354,7 +401,7 @@ class AddSong extends React.Component {
 
     // When the "back" button on the next page is pressed, return to search results
     goBack = () => {
-        this.setState({ videoSelected: null, playlistSelected: null });
+        this.setState({ videoSelected: null, playlistSelected: null, customAudioSelected: null });
     };
 
     render() {
@@ -388,6 +435,27 @@ class AddSong extends React.Component {
                             length: this.state.videoSelected.duration,
                             title,
                             artist,
+                        }}
+                        goBack={this.goBack}
+                        handleClose={this.props.handleClose}
+                        isNewSong={true}
+                    />
+                </div>
+            );
+        }
+
+        // If the user has verified a custom audio URL, show the song details form
+        if (this.state.customAudioSelected) {
+            return (
+                <div>
+                    <SongForm
+                        onSubmit={this.handleSubmit}
+                        initialValues={{
+                            playlist: this.props.playlists.length === 1 ? this.props.playlists[0].playlist_id : this.props.currentPlaylist,
+                            videoId: '',
+                            length: '',
+                            title: '',
+                            artist: '',
                         }}
                         goBack={this.goBack}
                         handleClose={this.props.handleClose}
